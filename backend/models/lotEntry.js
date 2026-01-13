@@ -9,12 +9,6 @@ const LotEntryModel = (sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
-      lotNo: {
-        type: DataTypes.STRING(50),
-        allowNull: false,
-        unique: true,
-        field: "lot_no",
-      },
       inwardId: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -26,93 +20,72 @@ const LotEntryModel = (sequelize) => {
         onUpdate: "CASCADE",
         field: "inward_id",
       },
-      partyDate: {
-        type: DataTypes.DATEONLY,
-        allowNull: true,
-        field: "party_date",
+      lotNo: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+        unique: true,
+        field: "lot_no",
       },
-      billNo: {
+      setNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
-        field: "bill_no",
+        field: "set_no",
       },
-      freight: {
+      cessPaidAmt: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
+        defaultValue: 0.00,
+        field: "cess_paid_amt",
       },
-      billDate: {
+      lotDate: {
         type: DataTypes.DATEONLY,
         allowNull: true,
-        field: "bill_date",
+        field: "lot_date",
       },
-      coolyBale: {
-        type: DataTypes.DECIMAL(12, 2),
-        allowNull: true,
-        field: "cooly_bale",
-      },
-      lorryNo: {
+      type: {
         type: DataTypes.STRING(50),
         allowNull: true,
-        field: "lorry_no",
       },
-      taxPercentage: {
-        type: DataTypes.DECIMAL(5, 2),
+      godownId: {
+        type: DataTypes.INTEGER,
         allowNull: true,
-        field: "tax_percentage",
+        references: {
+          model: "godowns",
+          key: "id",
+        },
+        onDelete: "SET NULL",
+        onUpdate: "CASCADE",
+        field: "id",
       },
-      taxAmount: {
-        type: DataTypes.DECIMAL(12, 2),
+      balesQty: {
+        type: DataTypes.INTEGER,
         allowNull: true,
-        field: "tax_amount",
+        field: "bales_qty",
       },
-      date: {
-        type: DataTypes.DATEONLY,
+      currency: {
+        type: DataTypes.STRING(20),
         allowNull: true,
-      },
-      grossWeight: {
-        type: DataTypes.DECIMAL(12, 3),
-        allowNull: true,
-        field: "gross_weight",
+        defaultValue: "RUPEES",
       },
       candyRate: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
         field: "candy_rate",
       },
-      tareWeight: {
-        type: DataTypes.DECIMAL(12, 3),
-        allowNull: true,
-        field: "tare_weight",
-      },
-      pMark: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        field: "p_mark",
-      },
-      nettWeight: {
-        type: DataTypes.DECIMAL(12, 3),
-        allowNull: true,
-        field: "nett_weight",
-      },
-      pressRunningNo: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        field: "press_running_no",
-      },
-      permitNo: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        field: "permit_no",
-      },
-      commisType: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        field: "commis_type",
-      },
-      commisValue: {
+      quintolRate: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
-        field: "commis_value",
+        field: "quintol_rate",
+      },
+      rateKg: {
+        type: DataTypes.DECIMAL(12, 4),
+        allowNull: true,
+        field: "rate_kg",
+      },
+      invoiceValue: {
+        type: DataTypes.DECIMAL(15, 2),
+        allowNull: true,
+        field: "invoice_value", // calculated in frontend
       },
     },
     {
@@ -121,6 +94,7 @@ const LotEntryModel = (sequelize) => {
       indexes: [
         { unique: true, fields: ["lot_no"] },
         { fields: ["inward_id"] },
+        { fields: ["id"] },
       ],
     }
   );

@@ -222,4 +222,13 @@ db.LotEntry.belongsTo(db.InwardEntry, {
   as: "inwardEntry",
 });
 
+db.Godown.hasMany(db.LotEntry, {
+  foreignKey: "godownId",
+  as: "lotEntries",
+});
+db.LotEntry.belongsTo(db.Godown, {
+  foreignKey: "godownId",
+  as: "godown",
+});
+
 export default db;
