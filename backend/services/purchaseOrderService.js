@@ -47,13 +47,6 @@ export const createPurchaseOrder = async (data) => {
     const cb = await CompanyBroker.findByPk(data.companyBrokerId);
     if (!cb) throw new Error("Company Broker not found");
   }
-
-  // Validate exactly one rate type
-  const rates = [data.candyRate, data.quintalRate, data.ratePerKg].filter(Boolean);
-  if (rates.length !== 1) {
-    throw new Error("Exactly one rate type (candyRate, quintalRate, or ratePerKg) must be provided");
-  }
-
   return await PurchaseOrder.create(data);
 };
 

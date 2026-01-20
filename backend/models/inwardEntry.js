@@ -9,101 +9,120 @@ const InwardEntryModel = (sequelize) => {
         autoIncrement: true,
         primaryKey: true,
       },
+
       inwardNo: {
         type: DataTypes.STRING(50),
         allowNull: false,
         unique: true,
         field: "inward_no",
       },
+
       purchaseOrderId: {
         type: DataTypes.INTEGER,
-        allowNull: true, // optional
+        allowNull: true,
         references: {
           model: "purchase_orders",
           key: "id",
         },
-        onDelete: "SET NULL", // if PO deleted, keep inward but nullify reference
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
         field: "purchase_order_id",
       },
+
       lcNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "lc_no",
       },
+
       paymentDays: {
         type: DataTypes.INTEGER,
         allowNull: true,
         field: "payment_days",
       },
+
       paymentDate: {
         type: DataTypes.DATEONLY,
         allowNull: true,
         field: "payment_date",
       },
+
       govtForm: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "govt_form",
       },
+
       type: {
         type: DataTypes.STRING(50),
         allowNull: true,
       },
+
       inwardDate: {
         type: DataTypes.DATEONLY,
         allowNull: false,
         field: "inward_date",
       },
+
       billNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "bill_no",
       },
+
       billDate: {
         type: DataTypes.DATEONLY,
         allowNull: true,
         field: "bill_date",
       },
+
       lotNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "lot_no",
       },
+
       lorryNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "lorry_no",
       },
+
       date: {
         type: DataTypes.DATEONLY,
         allowNull: true,
       },
+
       candyRate: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
         field: "candy_rate",
       },
+
       pMark: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "p_mark",
       },
+
       pressRunningNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "press_running_no",
       },
+
       commisType: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "commis_type",
       },
+
       commisValue: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
         field: "commis_value",
       },
+
       godownId: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -115,69 +134,104 @@ const InwardEntryModel = (sequelize) => {
         onUpdate: "CASCADE",
         field: "godown_id",
       },
+
       balesQty: {
         type: DataTypes.INTEGER,
         allowNull: true,
         field: "bales_qty",
       },
+
       freight: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
       },
-      coolyBale: {
+
+      /* ✅ SEPARATED FIELDS */
+      cooly: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
-        field: "cooly_bale",
       },
-      gst: {
-        type: DataTypes.DECIMAL(5, 2),
+
+      bale: {
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: true,
       },
+
+      /* ✅ TAX PERCENTAGES */
       sgst: {
         type: DataTypes.DECIMAL(5, 2),
         allowNull: true,
       },
+
       cgst: {
         type: DataTypes.DECIMAL(5, 2),
         allowNull: true,
       },
+
       igst: {
         type: DataTypes.DECIMAL(5, 2),
         allowNull: true,
       },
+
+      /* ✅ TAX AMOUNTS */
+      sgstAmount: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: true,
+        field: "sgst_amount",
+      },
+
+      cgstAmount: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: true,
+        field: "cgst_amount",
+      },
+
+      igstAmount: {
+        type: DataTypes.DECIMAL(12, 2),
+        allowNull: true,
+        field: "igst_amount",
+      },
+
       tax: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
       },
+
       taxAmount: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
         field: "tax_amount",
       },
+
       grossWeight: {
         type: DataTypes.DECIMAL(12, 3),
         allowNull: true,
         field: "gross_weight",
       },
+
       tareWeight: {
         type: DataTypes.DECIMAL(12, 3),
         allowNull: true,
         field: "tare_weight",
       },
+
       nettWeight: {
         type: DataTypes.DECIMAL(12, 3),
         allowNull: true,
         field: "nett_weight",
       },
+
       permitNo: {
         type: DataTypes.STRING(50),
         allowNull: true,
         field: "permit_no",
       },
+
       comm: {
         type: DataTypes.DECIMAL(12, 2),
         allowNull: true,
       },
+
       remarks: {
         type: DataTypes.TEXT,
         allowNull: true,
