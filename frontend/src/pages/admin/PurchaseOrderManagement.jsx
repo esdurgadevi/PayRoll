@@ -87,8 +87,6 @@ const PurchaseOrderManagement = () => {
     mixingGroupName: '',
     stationId: '',
     stationName: '',
-    companyBrokerId: '',
-    companyBrokerName: '',
     
     expectedDeliveryDate: '',
     
@@ -177,7 +175,34 @@ const PurchaseOrderManagement = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+  // Add this useEffect after your other useEffects
+useEffect(() => {
+  // Calculate rate per kg from quintal rate (quintal rate / 100)
+  if (formData.quintalRate && !isNaN(parseFloat(formData.quintalRate))) {
+    const calculatedRatePerKg = parseFloat(formData.quintalRate) / 100;
+    setFormData(prev => ({
+      ...prev,
+      ratePerKg: calculatedRatePerKg.toFixed(2)
+    }));
+  }
+}, [formData.quintalRate]);
 
+useEffect(() => {
+  // Calculate approximate lot value when quantity or rate changes
+  const calculateApproxLotValue = () => {
+    const quantity = parseFloat(formData.quantity);
+    let rate = parseFloat(formData.ratePerKg) || 0;
+    return quantity*(rate);
+  };
+  
+  const approxValue = calculateApproxLotValue();
+  if (approxValue !== formData.approxLotValue) {
+    setFormData(prev => ({
+      ...prev,
+      approxLotValue: approxValue
+    }));
+  }
+}, [formData.quantity, formData.candyRate, formData.quintalRate, formData.ratePerKg, formData.selectedRateType]);
   // Fetch functions
   const fetchPurchaseOrders = async () => {
     setLoading(true);
@@ -391,14 +416,6 @@ const PurchaseOrderManagement = () => {
     );
   });
 
-  const filteredCompanyBrokers = companyBrokers.filter(broker => {
-    if (!companyBrokerSearch.trim()) return companyBrokers;
-    const searchLower = companyBrokerSearch.toLowerCase();
-    return (
-      (broker.companyName && broker.companyName.toLowerCase().includes(searchLower)) ||
-      (broker.code && broker.code.toString().includes(searchLower))
-    );
-  });
 
   // Filter purchase orders based on search
   const filteredOrders = (() => {
@@ -495,15 +512,6 @@ const PurchaseOrderManagement = () => {
     setShowStationDropdown(false);
   };
 
-  const handleCompanyBrokerSelect = (broker) => {
-    setFormData(prev => ({
-      ...prev,
-      companyBrokerId: broker.id,
-      companyBrokerName: broker.companyName
-    }));
-    setCompanyBrokerSearch(broker.companyName);
-    setShowCompanyBrokerDropdown(false);
-  };
 
   // Clear selection functions
   const clearSupplierSelection = () => {
@@ -554,16 +562,6 @@ const PurchaseOrderManagement = () => {
     }));
     setStationSearch('');
     setShowStationDropdown(false);
-  };
-
-  const clearCompanyBrokerSelection = () => {
-    setFormData(prev => ({
-      ...prev,
-      companyBrokerId: '',
-      companyBrokerName: ''
-    }));
-    setCompanyBrokerSearch('');
-    setShowCompanyBrokerDropdown(false);
   };
 
   // Handle rate calculation
@@ -640,34 +638,44 @@ const PurchaseOrderManagement = () => {
 
     try {
       // Prepare payload
-      const payload = {
-        orderNo: formData.orderNo.trim(),
-        orderDate: formData.orderDate,
-        supplierId: parseInt(formData.supplierId, 10),
-        brokerId: formData.brokerId ? parseInt(formData.brokerId, 10) : null,
-        varietyId: parseInt(formData.varietyId, 10),
-        mixingGroupId: parseInt(formData.mixingGroupId, 10),
-        stationId: parseInt(formData.stationId, 10),
-        companyBrokerId: formData.companyBrokerId ? parseInt(formData.companyBrokerId, 10) : null,
-        expectedDeliveryDate: formData.expectedDeliveryDate || null,
-        orderType: formData.orderType,
-        packingType: formData.packingType,
-        quantity: parseFloat(formData.quantity),
-        candyRate: formData.candyRate ? parseFloat(formData.candyRate) : null,
-        quintalRate: formData.quintalRate ? parseFloat(formData.quintalRate) : null,
-        ratePerKg: formData.ratePerKg ? parseFloat(formData.ratePerKg) : null,
-        selectedRateType: formData.selectedRateType,
-        approxLotValue: formData.approxLotValue ? parseFloat(formData.approxLotValue) : null,
-        paymentMode: formData.paymentMode || null,
-        currency: formData.currency,
-        staple: formData.staple ? parseFloat(formData.staple) : null,
-        moist: formData.moist ? parseFloat(formData.moist) : null,
-        mic: formData.mic ? parseFloat(formData.mic) : null,
-        str: formData.str ? parseFloat(formData.str) : null,
-        rd: formData.rd ? parseFloat(formData.rd) : null,
-        remarks: formData.remarks || null
-      };
       
+      const payload = {
+  orderNo: formData.orderNo ? formData.orderNo.trim() : "",
+  orderDate: formData.orderDate,
+
+  supplierId: Number(formData.supplierId),
+  brokerId: formData.brokerId ? Number(formData.brokerId) : null,
+  varietyId: Number(formData.varietyId),
+  mixingGroupId: Number(formData.mixingGroupId),
+  stationId: Number(formData.stationId),
+
+  expectedDeliveryDate: formData.expectedDeliveryDate || null,
+
+  orderType: formData.orderType,
+  packingType: formData.packingType,
+
+  quantity: Number(formData.quantity),
+
+  candyRate: formData.candyRate !== undefined ? Number(formData.candyRate) : null,
+  quintalRate: formData.quintalRate !== undefined ? Number(formData.quintalRate) : null,
+  ratePerKg: formData.ratePerKg !== undefined ? Number(formData.ratePerKg) : null,
+
+  selectedRateType: formData.selectedRateType,
+
+  approxLotValue: formData.approxLotValue !== undefined ? Number(formData.approxLotValue) : null,
+
+  paymentMode: formData.paymentMode || null,
+  currency: formData.currency || "RUPEES",
+
+  staple: formData.staple !== undefined ? Number(formData.staple) : null,
+  moist: formData.moist !== undefined ? Number(formData.moist) : null,
+  mic: formData.mic !== undefined ? Number(formData.mic) : null,
+  str: formData.str !== undefined ? Number(formData.str) : null,
+  rd: formData.rd !== undefined ? Number(formData.rd) : null,
+
+  remarks: formData.remarks || null,
+};
+
       if (editingOrder) {
         // Update existing order
         await purchaseOrderService.update(editingOrder.id, payload);
@@ -1370,105 +1378,176 @@ const PurchaseOrderManagement = () => {
                     </div>
 
                     {/* Quantity and Rate Section */}
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Quantity & Rate</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Quantity */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Quantity *
-                          </label>
-                          <div className="relative">
-                            <Scale className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="quantity"
-                              value={formData.quantity}
-                              onChange={handleInputChange}
-                              required
-                              min="0"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Enter quantity"
-                            />
-                          </div>
-                        </div>
+                    {/* Quantity and Rate Section */}
+<div className="bg-gray-50 p-4 rounded-lg">
+  <h4 className="text-lg font-semibold text-gray-800 mb-4">Quantity & Rate</h4>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {/* Quantity */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Quantity *
+      </label>
+      <div className="relative">
+        <Scale className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="number"
+          name="quantity"
+          value={formData.quantity}
+          onChange={handleInputChange}
+          required
+          min="0"
+          step="0.01"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter quantity"
+        />
+      </div>
+    </div>
 
-                        {/* Approx Lot Value */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Approx Lot Value (₹)
-                          </label>
-                          <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="approxLotValue"
-                              value={formData.approxLotValue}
-                              onChange={handleInputChange}
-                              min="0"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Approximate lot value"
-                            />
-                          </div>
-                        </div>
+    {/* Candy Rate */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Candy Rate (₹/candy)
+      </label>
+      <div className="relative">
+        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="number"
+          name="candyRate"
+          value={formData.candyRate}
+          onChange={handleInputChange}
+          min="0"
+          step="0.01"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter candy rate"
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-500">1 candy = 356 kg</p>
+    </div>
 
-                        {/* Rate Type Selection */}
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Rate Type *
-                          </label>
-                          <div className="flex space-x-4">
-                            <button
-                              type="button"
-                              onClick={() => handleRateTypeChange('CANDY')}
-                              className={`px-4 py-2 rounded-lg border ${formData.selectedRateType === 'CANDY' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
-                            >
-                              Candy Rate
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRateTypeChange('QUINTAL')}
-                              className={`px-4 py-2 rounded-lg border ${formData.selectedRateType === 'QUINTAL' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
-                            >
-                              Quintal Rate
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleRateTypeChange('PER_KG')}
-                              className={`px-4 py-2 rounded-lg border ${formData.selectedRateType === 'PER_KG' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
-                            >
-                              Per Kg Rate
-                            </button>
-                          </div>
-                        </div>
+    {/* Quintal Rate */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Quintal Rate (₹/quintal)
+      </label>
+      <div className="relative">
+        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="number"
+          name="quintalRate"
+          value={formData.quintalRate}
+          onChange={handleInputChange}
+          min="0"
+          step="0.01"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Enter quintal rate"
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-500">1 quintal = 100 kg</p>
+    </div>
 
-                        {/* Rate Input based on selection */}
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Rate Amount *
-                          </label>
-                          <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name={formData.selectedRateType === 'CANDY' ? 'candyRate' : 
-                                    formData.selectedRateType === 'QUINTAL' ? 'quintalRate' : 'ratePerKg'}
-                              value={formData.selectedRateType === 'CANDY' ? formData.candyRate : 
-                                     formData.selectedRateType === 'QUINTAL' ? formData.quintalRate : formData.ratePerKg}
-                              onChange={handleInputChange}
-                              required={formData.selectedRateType !== ''}
-                              min="0"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder={`Enter ${formData.selectedRateType === 'CANDY' ? 'candy rate' : 
-                                         formData.selectedRateType === 'QUINTAL' ? 'quintal rate' : 'rate per kg'}`}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+    {/* Rate Per Kg (calculated) */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Rate Per Kg (₹/kg) *
+      </label>
+      <div className="relative">
+        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="number"
+          name="ratePerKg"
+          value={formData.ratePerKg}
+          onChange={handleInputChange}
+          required
+          min="0"
+          step="0.01"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Auto-calculated from quintal rate"
+          readOnly
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-500">Calculated: Quintal Rate ÷ 100</p>
+    </div>
+
+    {/* Approx Lot Value */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Approx Lot Value (₹)
+      </label>
+      <div className="relative">
+        <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="number"
+          name="approxLotValue"
+          value={formData.approxLotValue}
+          onChange={handleInputChange}
+          min="0"
+          step="0.01"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Auto-calculated"
+          readOnly
+        />
+      </div>
+      <p className="mt-1 text-xs text-gray-500">Calculated based on selected rate type</p>
+    </div>
+
+    {/* Rate Type Selection for Display/Radio */}
+    <div className="md:col-span-2">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Select Rate Type for Display *
+      </label>
+      <div className="flex space-x-4">
+        <button
+          type="button"
+          onClick={() => setFormData(prev => ({ ...prev, selectedRateType: 'CANDY' }))}
+          className={`px-4 py-2 rounded-lg border ${formData.selectedRateType === 'CANDY' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+        >
+          <div className="flex items-center">
+            <input
+              type="radio"
+              checked={formData.selectedRateType === 'CANDY'}
+              onChange={() => {}}
+              className="mr-2"
+            />
+            Candy Rate
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => setFormData(prev => ({ ...prev, selectedRateType: 'QUINTAL' }))}
+          className={`px-4 py-2 rounded-lg border ${formData.selectedRateType === 'QUINTAL' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+        >
+          <div className="flex items-center">
+            <input
+              type="radio"
+              checked={formData.selectedRateType === 'QUINTAL'}
+              onChange={() => {}}
+              className="mr-2"
+            />
+            Quintal Rate
+          </div>
+        </button>
+        <button
+          type="button"
+          onClick={() => setFormData(prev => ({ ...prev, selectedRateType: 'PER_KG' }))}
+          className={`px-4 py-2 rounded-lg border ${formData.selectedRateType === 'PER_KG' ? 'bg-blue-100 text-blue-700 border-blue-300' : 'bg-gray-100 text-gray-700 border-gray-300'}`}
+        >
+          <div className="flex items-center">
+            <input
+              type="radio"
+              checked={formData.selectedRateType === 'PER_KG'}
+              onChange={() => {}}
+              className="mr-2"
+            />
+            Per Kg Rate
+          </div>
+        </button>
+      </div>
+      <p className="mt-2 text-xs text-gray-500">
+        Selected for display: <span className="font-medium">{formData.selectedRateType}</span>
+      </p>
+    </div>
+  </div>
+</div>
 
                     {/* Quality Parameters */}
                     <div className="bg-gray-50 p-4 rounded-lg">
@@ -1937,73 +2016,7 @@ const PurchaseOrderManagement = () => {
                           )}
                         </div>
 
-                        {/* Company Broker Autocomplete */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Company Broker (Optional)
-                          </label>
-                          <div className="relative" ref={companyBrokerRef}>
-                            <Truck className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
-                            <input
-                              type="text"
-                              value={companyBrokerSearch}
-                              onChange={(e) => {
-                                setCompanyBrokerSearch(e.target.value);
-                                setShowCompanyBrokerDropdown(true);
-                              }}
-                              onFocus={() => setShowCompanyBrokerDropdown(true)}
-                              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Type to search company brokers..."
-                            />
-                            {formData.companyBrokerId && (
-                              <button
-                                type="button"
-                                onClick={clearCompanyBrokerSelection}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </button>
-                            )}
-                            
-                            {/* Company Broker Dropdown */}
-                            {showCompanyBrokerDropdown && (
-                              <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                {companyBrokerLoading ? (
-                                  <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
-                                    Loading company brokers...
-                                  </div>
-                                ) : filteredCompanyBrokers.length === 0 ? (
-                                  <div className="p-3 text-center text-gray-500">
-                                    {companyBrokerSearch ? 'No company brokers found' : 'No company brokers available'}
-                                  </div>
-                                ) : (
-                                  filteredCompanyBrokers.map((broker) => (
-                                    <div
-                                      key={broker.id}
-                                      onClick={() => handleCompanyBrokerSelect(broker)}
-                                      className={`p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                                        formData.companyBrokerId === broker.id ? 'bg-blue-50' : ''
-                                      }`}
-                                    >
-                                      <div className="flex items-center justify-between">
-                                        <div>
-                                          <div className="font-medium text-gray-900">{broker.companyName}</div>
-                                          <div className="text-xs text-gray-500">
-                                            Code: #{broker.code}
-                                          </div>
-                                        </div>
-                                        {formData.companyBrokerId === broker.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
-                                        )}
-                                      </div>
-                                    </div>
-                                  ))
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                       
                       </div>
                     </div>
 
@@ -2146,14 +2159,6 @@ const PurchaseOrderManagement = () => {
                             <div className="text-sm text-gray-500">Broker</div>
                             <div className="font-medium text-gray-900">
                               {getBrokerName(viewingOrder.brokerId)}
-                            </div>
-                          </div>
-                        )}
-                        {viewingOrder.companyBrokerId && (
-                          <div>
-                            <div className="text-sm text-gray-500">Company Broker</div>
-                            <div className="font-medium text-gray-900">
-                              {getCompanyBrokerName(viewingOrder.companyBrokerId)}
                             </div>
                           </div>
                         )}
@@ -2317,22 +2322,15 @@ const PurchaseOrderManagement = () => {
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
                   <button
-                    type="button"
-                    onClick={() => setShowViewModal(false)}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowViewModal(false);
-                      handleEdit(viewingOrder);
-                    }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
-                  >
-                    Edit Order
-                  </button>
+  type="submit"
+  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50"
+  disabled={!formData.orderNo || !formData.orderDate || !formData.supplierId || !formData.varietyId || 
+           !formData.mixingGroupId || !formData.stationId || !formData.quantity ||
+           !formData.ratePerKg || parseFloat(formData.ratePerKg) <= 0}
+>
+  {editingOrder ? 'Update Order' : 'Create Order'}
+</button>
+                   
                 </div>
               </div>
             </div>

@@ -80,6 +80,7 @@ const InwardEntryManagement = () => {
     inwardNo: '',
     orderNo: '',
     orderId: '',
+    purchaseOrderId: '',
     
     // Purchase Order details (read-only after selection)
     supplierName: '',
@@ -118,15 +119,13 @@ const InwardEntryManagement = () => {
     // Weight and quantity
     balesQty: '',
     freight: '',
-    coolyBale: '',
+    cooly: '',  // Changed from coolyBale
+    bale: '',   // Changed from coolyBale
     
-    // Tax details
-    gst: '',
+    // Tax details (rates only - amounts will be calculated)
     sgst: '',
     cgst: '',
     igst: '',
-    tax: '',
-    taxAmount: '',
     
     // Weight details
     grossWeight: '',
@@ -194,6 +193,42 @@ const InwardEntryManagement = () => {
       setLoading(false);
     }
   };
+  
+  // Calculate nett weight automatically
+  useEffect(() => {
+    const calculateNettWeight = () => {
+      const gross = parseFloat(formData.grossWeight) || 0;
+      const tare = parseFloat(formData.tareWeight) || 0;
+      
+      if (gross > 0 && tare >= 0) {
+        const nett = gross - tare;
+        return nett > 0 ? nett.toFixed(2) : '';
+      }
+      return '';
+    };
+    
+    const nettWeight = calculateNettWeight();
+    if (nettWeight !== formData.nettWeight) {
+      setFormData(prev => ({
+        ...prev,
+        nettWeight: nettWeight
+      }));
+    }
+  }, [formData.grossWeight, formData.tareWeight, formData.nettWeight]);
+
+  // Calculate tax amounts
+  const calculateTaxAmounts = () => {
+    const candyRate = parseFloat(formData.candyRate) || 0;
+    const sgstRate = parseFloat(formData.sgst) || 0;
+    const cgstRate = parseFloat(formData.cgst) || 0;
+    const igstRate = parseFloat(formData.igst) || 0;
+    
+    return {
+      sgstAmount: candyRate * (sgstRate / 100),
+      cgstAmount: candyRate * (cgstRate / 100),
+      igstAmount: candyRate * (igstRate / 100)
+    };
+  };
 
   const fetchPurchaseOrders = async () => {
     setPurchaseOrderLoading(true);
@@ -259,6 +294,7 @@ const InwardEntryManagement = () => {
         ...prev,
         orderNo: order.orderNo,
         orderId: order.id,
+        purchaseOrderId: order.id,
         candyRate: order.candyRate || ''
       }));
       
@@ -424,10 +460,10 @@ const InwardEntryManagement = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : 
               (name === 'paymentDays' || name === 'candyRate' || name === 'commisValue' || 
-               name === 'balesQty' || name === 'freight' || name === 'coolyBale' ||
-               name === 'gst' || name === 'sgst' || name === 'cgst' || name === 'igst' ||
-               name === 'tax' || name === 'taxAmount' || name === 'grossWeight' ||
-               name === 'tareWeight' || name === 'nettWeight' || name === 'comm')
+               name === 'balesQty' || name === 'freight' || name === 'cooly' || name === 'bale' ||
+               name === 'sgst' || name === 'cgst' || name === 'igst' ||
+               name === 'grossWeight' || name === 'tareWeight' || name === 'nettWeight' || 
+               name === 'comm')
         ? (value === '' ? '' : parseFloat(value) || '')
         : value
     }));
@@ -450,6 +486,7 @@ const InwardEntryManagement = () => {
       ...prev,
       orderNo: '',
       orderId: '',
+      purchaseOrderId: '',
       supplierName: '',
       brokerName: '',
       varietyName: '',
@@ -501,39 +538,47 @@ const InwardEntryManagement = () => {
     }
 
     try {
-      // Prepare payload
+      // Prepare payload according to service requirements
       const payload = {
         inwardNo: formData.inwardNo.trim(),
-        orderNo: formData.orderNo,
+        inwardDate: formData.inwardDate,
+        purchaseOrderId: parseInt(formData.purchaseOrderId, 10),
+        orderNo: formData.orderNo || null,
+        godownId: parseInt(formData.godownId, 10),
+        
         lcNo: formData.lcNo || null,
         paymentDays: formData.paymentDays ? parseInt(formData.paymentDays, 10) : null,
         paymentDate: formData.paymentDate || null,
         govtForm: formData.govtForm,
         type: formData.type,
-        inwardDate: formData.inwardDate,
+        
         billNo: formData.billNo || null,
         billDate: formData.billDate || null,
         lotNo: formData.lotNo || null,
         lorryNo: formData.lorryNo || null,
-        date: formData.date || null,
+        
         candyRate: formData.candyRate ? parseFloat(formData.candyRate) : null,
         pMark: formData.pMark || null,
         pressRunningNo: formData.pressRunningNo || null,
         commisType: formData.commisType || null,
         commisValue: formData.commisValue ? parseFloat(formData.commisValue) : null,
-        godownId: parseInt(formData.godownId, 10),
+        
         balesQty: parseFloat(formData.balesQty),
-        freight: formData.freight ? parseFloat(formData.freight) : null,
-        coolyBale: formData.coolyBale ? parseFloat(formData.coolyBale) : null,
-        gst: formData.gst ? parseFloat(formData.gst) : null,
-        sgst: formData.sgst ? parseFloat(formData.sgst) : null,
-        cgst: formData.cgst ? parseFloat(formData.cgst) : null,
-        igst: formData.igst ? parseFloat(formData.igst) : null,
-        tax: formData.tax ? parseFloat(formData.tax) : null,
-        taxAmount: formData.taxAmount ? parseFloat(formData.taxAmount) : null,
+        freight: formData.freight ? parseFloat(formData.freight) : 0,
+        
+        // Split cooly/bale into two fields
+        cooly: formData.cooly ? parseFloat(formData.cooly) : 0,
+        bale: formData.bale ? parseFloat(formData.bale) : 0,
+        
+        // Tax rates only
+        sgst: formData.sgst ? parseFloat(formData.sgst) : 0,
+        cgst: formData.cgst ? parseFloat(formData.cgst) : 0,
+        igst: formData.igst ? parseFloat(formData.igst) : 0,
+        
         grossWeight: formData.grossWeight ? parseFloat(formData.grossWeight) : null,
         tareWeight: formData.tareWeight ? parseFloat(formData.tareWeight) : null,
         nettWeight: formData.nettWeight ? parseFloat(formData.nettWeight) : null,
+        
         permitNo: formData.permitNo || null,
         comm: formData.comm ? parseFloat(formData.comm) : null,
         remarks: formData.remarks || null
@@ -584,7 +629,8 @@ const InwardEntryManagement = () => {
     const basicFormData = {
       inwardNo: entry.inwardNo || '',
       orderNo: entry.orderNo || '',
-      orderId: entry.orderId || '',
+      orderId: entry.orderId || entry.purchaseOrderId || '',
+      purchaseOrderId: entry.purchaseOrderId || '',
       lcNo: entry.lcNo || '',
       paymentDays: entry.paymentDays || '',
       paymentDate: entry.paymentDate || '',
@@ -606,13 +652,11 @@ const InwardEntryManagement = () => {
       godownName: entry.godownName || '',
       balesQty: entry.balesQty || '',
       freight: entry.freight || '',
-      coolyBale: entry.coolyBale || '',
-      gst: entry.gst || '',
+      cooly: entry.cooly || '',  // Changed from coolyBale
+      bale: entry.bale || '',    // Changed from coolyBale
       sgst: entry.sgst || '',
       cgst: entry.cgst || '',
       igst: entry.igst || '',
-      tax: entry.tax || '',
-      taxAmount: entry.taxAmount || '',
       grossWeight: entry.grossWeight || '',
       tareWeight: entry.tareWeight || '',
       nettWeight: entry.nettWeight || '',
@@ -625,10 +669,11 @@ const InwardEntryManagement = () => {
     setPurchaseOrderSearch(entry.orderNo || '');
     setGodownSearch(entry.godownName || '');
     
-    // If there's an orderId, fetch the purchase order details
-    if (entry.orderId) {
+    // If there's an purchaseOrderId, fetch the purchase order details
+    if (entry.purchaseOrderId || entry.orderId) {
       try {
-        const purchaseOrder = await purchaseOrderService.getById(entry.orderId);
+        const orderId = entry.purchaseOrderId || entry.orderId;
+        const purchaseOrder = await purchaseOrderService.getById(orderId);
         
         // Then fetch all related names as we did in handlePurchaseOrderSelect
         const promises = [];
@@ -773,6 +818,7 @@ const InwardEntryManagement = () => {
       inwardNo: '',
       orderNo: '',
       orderId: '',
+      purchaseOrderId: '',
       supplierName: '',
       brokerName: '',
       varietyName: '',
@@ -801,13 +847,11 @@ const InwardEntryManagement = () => {
       godownName: '',
       balesQty: '',
       freight: '',
-      coolyBale: '',
-      gst: '',
+      cooly: '',  // Changed from coolyBale
+      bale: '',   // Changed from coolyBale
       sgst: '',
       cgst: '',
       igst: '',
-      tax: '',
-      taxAmount: '',
       grossWeight: '',
       tareWeight: '',
       nettWeight: '',
@@ -868,6 +912,9 @@ const InwardEntryManagement = () => {
       day: '2-digit'
     });
   };
+
+  // Get tax amounts for display
+  const taxAmounts = calculateTaxAmounts();
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -1537,17 +1584,32 @@ const InwardEntryManagement = () => {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Cooly / Bale
+                            Cooly
                           </label>
                           <input
                             type="number"
-                            name="coolyBale"
-                            value={formData.coolyBale}
+                            name="cooly"
+                            value={formData.cooly}
                             onChange={handleInputChange}
                             min="0"
                             step="0.01"
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            placeholder="Enter cooly per bale"
+                            placeholder="Enter cooly"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Bale
+                          </label>
+                          <input
+                            type="number"
+                            name="bale"
+                            value={formData.bale}
+                            onChange={handleInputChange}
+                            min="0"
+                            step="0.01"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Enter bale"
                           />
                         </div>
                         <div>
@@ -1767,118 +1829,112 @@ const InwardEntryManagement = () => {
                     {/* Tax Details */}
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="text-lg font-semibold text-gray-800 mb-4">Tax Details</h4>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            GST %
-                          </label>
-                          <div className="relative">
-                            <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="gst"
-                              value={formData.gst}
-                              onChange={handleInputChange}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="GST %"
-                            />
+                      <div className="space-y-4">
+                        {/* SGST */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              SGST %
+                            </label>
+                            <div className="relative">
+                              <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                              <input
+                                type="number"
+                                name="sgst"
+                                value={formData.sgst}
+                                onChange={handleInputChange}
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="SGST %"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              SGST Amount
+                            </label>
+                            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+                              <div className="text-gray-700">
+                                ₹{taxAmounts.sgstAmount.toFixed(2)}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                (Candy Rate × {formData.sgst || 0}%)
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            SGST %
-                          </label>
-                          <div className="relative">
-                            <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="sgst"
-                              value={formData.sgst}
-                              onChange={handleInputChange}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="SGST %"
-                            />
+
+                        {/* CGST */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CGST %
+                            </label>
+                            <div className="relative">
+                              <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                              <input
+                                type="number"
+                                name="cgst"
+                                value={formData.cgst}
+                                onChange={handleInputChange}
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="CGST %"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              CGST Amount
+                            </label>
+                            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+                              <div className="text-gray-700">
+                                ₹{taxAmounts.cgstAmount.toFixed(2)}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                (Candy Rate × {formData.cgst || 0}%)
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            CGST %
-                          </label>
-                          <div className="relative">
-                            <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="cgst"
-                              value={formData.cgst}
-                              onChange={handleInputChange}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="CGST %"
-                            />
+
+                        {/* IGST */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              IGST %
+                            </label>
+                            <div className="relative">
+                              <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                              <input
+                                type="number"
+                                name="igst"
+                                value={formData.igst}
+                                onChange={handleInputChange}
+                                min="0"
+                                max="100"
+                                step="0.01"
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="IGST %"
+                              />
+                            </div>
                           </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            IGST %
-                          </label>
-                          <div className="relative">
-                            <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="igst"
-                              value={formData.igst}
-                              onChange={handleInputChange}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="IGST %"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tax %
-                          </label>
-                          <div className="relative">
-                            <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="tax"
-                              value={formData.tax}
-                              onChange={handleInputChange}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Tax %"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Tax Amount
-                          </label>
-                          <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            <input
-                              type="number"
-                              name="taxAmount"
-                              value={formData.taxAmount}
-                              onChange={handleInputChange}
-                              min="0"
-                              step="0.01"
-                              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Tax amount"
-                            />
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              IGST Amount
+                            </label>
+                            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+                              <div className="text-gray-700">
+                                ₹{taxAmounts.igstAmount.toFixed(2)}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                (Candy Rate × {formData.igst || 0}%)
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2125,6 +2181,51 @@ const InwardEntryManagement = () => {
                             <div className="text-sm text-gray-500">Freight</div>
                             <div className="font-medium text-gray-900">
                               {viewingEntry.freight ? `₹${viewingEntry.freight}` : 'N/A'}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tax Details */}
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h5 className="text-lg font-semibold text-gray-800 mb-3">Tax Details</h5>
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="text-sm text-gray-500">SGST %</div>
+                            <div className="font-medium text-gray-900">
+                              {viewingEntry.sgst || 0}%
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">SGST Amount</div>
+                            <div className="font-medium text-gray-900">
+                              ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.sgst || 0) / 100)).toFixed(2)}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">CGST %</div>
+                            <div className="font-medium text-gray-900">
+                              {viewingEntry.cgst || 0}%
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">CGST Amount</div>
+                            <div className="font-medium text-gray-900">
+                              ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.cgst || 0) / 100)).toFixed(2)}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">IGST %</div>
+                            <div className="font-medium text-gray-900">
+                              {viewingEntry.igst || 0}%
+                            </div>
+                          </div>
+                          <div>
+                            <div className="text-sm text-gray-500">IGST Amount</div>
+                            <div className="font-medium text-gray-900">
+                              ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.igst || 0) / 100)).toFixed(2)}
                             </div>
                           </div>
                         </div>

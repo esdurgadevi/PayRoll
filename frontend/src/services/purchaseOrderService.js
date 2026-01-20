@@ -38,7 +38,9 @@ const purchaseOrderService = {
   },
   // 🔹 Create purchase order
   create: async (data) => {
+    console.log(data);
     const payload = {
+      
       orderNo: data.orderNo,
       orderDate: data.orderDate, // YYYY-MM-DD
 
@@ -47,9 +49,6 @@ const purchaseOrderService = {
       varietyId: Number(data.varietyId),
       mixingGroupId: Number(data.mixingGroupId),
       stationId: Number(data.stationId),
-      companyBrokerId: data.companyBrokerId
-        ? Number(data.companyBrokerId)
-        : null,
 
       expectedDeliveryDate: data.expectedDeliveryDate || null,
 

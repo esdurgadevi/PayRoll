@@ -31,6 +31,7 @@ import Broker from "./pages/admin/Broker.jsx";
 import Cost from "./pages/admin/Cost.jsx"
 import PurchaseOrderManagement from "./pages/admin/PurchaseOrderManagement.jsx";
 import InwardEntryManagement from "./pages/admin/InwardEntryManagement.jsx";
+import InwardLot from "./pages/admin/InwardLot.jsx";
 // ================= PROTECTED ROUTE =================
 const ProtectedRoute = ({ children, role }) => {
   const userStr = localStorage.getItem("user");
@@ -89,7 +90,8 @@ const routes = [
       { path: "cost-master",element:<Cost />},
       { path:"purchase-order",element:<PurchaseOrderManagement />},
       { path: "reports", element: <Reports /> },
-      { path:"inward-entries", element:<InwardEntryManagement />}
+      { path:"inward-entries", element:<InwardEntryManagement />},
+      { path:"inward-lot",element:<InwardLot />}
     ],
   },
 ];
