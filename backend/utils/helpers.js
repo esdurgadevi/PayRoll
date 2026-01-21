@@ -4,7 +4,7 @@ import db from "../models/index.js";
 
 const { PurchaseOrder } = db;
 const { InwardEntry } = db;
-const { LotEntry } = db;
+const { InwardLot } = db;
 /**
  * Returns the NEXT auto-generated Purchase Order number
  * Format: PO/YY-YY/XXXX
@@ -76,20 +76,30 @@ export const getNextLotNo = async () => {
   const now = new Date();
   let year = now.getFullYear();
   if (now.getMonth() < 3) year -= 1;
-  const nextYear = year + 1;
-  const fyPrefix = `${year.toString().slice(-2)}-${nextYear.toString().slice(-2)}`;
 
-  const lastEntry = await LotEntry.findOne({
-    where: { lotNo: { [Op.like]: `UC/${fyPrefix}/%` } },
-    order: [["createdAt", "DESC"]],
+  const nextYear = year + 1;
+  const fyPrefix = `${year.toString().slice(-2)}-${nextYear
+    .toString()
+    .slice(-2)}`;
+
+  const lastLot = await InwardLot.findOne({
+    where: {
+      inwardLotId: {
+        [Op.like]: `LOT/${fyPrefix}/%`,
+      },
+    },
+    order: [["inwardLotId", "DESC"]],
+    limit: 1,
   });
 
   let nextSeq = 1;
-  if (lastEntry) {
-    const lastNum = parseInt(lastEntry.lotNo.split("/").pop(), 10);
+
+  if (lastLot) {
+    const lastPart = lastLot.inwardLotId.split("/").pop();
+    const lastNum = parseInt(lastPart, 10);
     if (!isNaN(lastNum)) nextSeq = lastNum + 1;
   }
 
   const padded = String(nextSeq).padStart(4, "0");
-  return `UC/${fyPrefix}/${padded}`;
+  return `LOT/${fyPrefix}/${padded}`;
 };

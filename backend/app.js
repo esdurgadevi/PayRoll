@@ -21,7 +21,6 @@ import wasteLotRoutes from './routes/wasteLotRoutes.js';
 import costMasterRoutes from './routes/costMasterRoutes.js';
 import purchaseOrderRoutes from './routes/purchaseOrderRoutes.js';
 import inwardEntryRoutes from './routes/inwardEntryRoutes.js';
-import lotEntryRoutes from './routes/lotEntryRoutes.js';
 
 const app = express();
 
@@ -49,6 +48,6 @@ app.use("/api/waste-lots", wasteLotRoutes);
 app.use("/api/cost-masters", costMasterRoutes);
 app.use("/api/purchase-orders", purchaseOrderRoutes);
 app.use("/api/inward-entries", inwardEntryRoutes);
-app.use("/api/lot-entries", lotEntryRoutes);
+
 
 export default app;

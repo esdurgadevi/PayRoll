@@ -1,0 +1,27 @@
+// routes/inwardLotRoutes.js
+import express from "express";
+import {
+  getNextLotNo,
+  createLot,
+  getAllLots,
+  getLot,
+  updateLot,
+  deleteLot,
+} from "../controllers/inwardLotController.js";
+import { protect } from "../middlewares/authMiddleware.js";
+
+const router = express.Router();
+router.use(protect);
+
+router.get("/next-lot-no", getNextLotNo);
+router.post("/", createLot);
+router.get("/", getAllLots);
+router.get("/:lotNo", getLot);
+router.put("/:lotNo", updateLot);
+router.delete("/:lotNo", deleteLot);
+
+export default router;
+
+
+
+

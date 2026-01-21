@@ -22,7 +22,8 @@ import WasteLotModel from "./wasteLot.js"
 import CostMasterModel from "./costMaster.js";
 import PurchaseOrderModel from "./purchaseOrder.js";
 import InwardEntryModel from "./inwardEntry.js";
-import LotEntryModel from "./lotEntry.js";
+import InwardLotModel from "./inwardLot.js";
+import InwardLotWeightmentModel from "./inwardLotWeightment.js";
 
 const db = {};
 db.sequelize = sequelize;
@@ -48,7 +49,8 @@ db.WasteLot = WasteLotModel(sequelize);
 db.CostMaster = CostMasterModel(sequelize);
 db.PurchaseOrder = PurchaseOrderModel(sequelize);
 db.InwardEntry = InwardEntryModel(sequelize);
-db.LotEntry = LotEntryModel(sequelize);
+db.InwardLot = InwardLotModel(sequelize);
+db.InwardLotWeightment = InwardLotWeightmentModel(sequelize);
 
 db.State.hasMany(db.Station, {
   foreignKey: "stateId",
@@ -213,22 +215,26 @@ db.InwardEntry.belongsTo(db.Godown, {
   as: "godown",
 });
 
-db.InwardEntry.hasMany(db.LotEntry, {
+db.InwardEntry.hasMany(db.InwardLot, {
   foreignKey: "inwardId",
-  as: "lotEntries",
+  as: "inwardLots",
 });
-db.LotEntry.belongsTo(db.InwardEntry, {
+
+db.InwardLot.belongsTo(db.InwardEntry, {
   foreignKey: "inwardId",
   as: "inwardEntry",
 });
 
-db.Godown.hasMany(db.LotEntry, {
-  foreignKey: "godownId",
-  as: "lotEntries",
+db.InwardLot.hasMany(db.InwardLotWeightment, {
+  foreignKey: "inwardLotId",
+  as: "weightments",
 });
-db.LotEntry.belongsTo(db.Godown, {
-  foreignKey: "godownId",
-  as: "godown",
+
+db.InwardLotWeightment.belongsTo(db.InwardLot, {
+  foreignKey: "inwardLotId",
+  as: "inwardLot",
 });
+
+
 
 export default db;
