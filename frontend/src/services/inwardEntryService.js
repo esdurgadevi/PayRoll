@@ -29,7 +29,7 @@ const inwardEntryService = {
   ============================= */
   getNextInwardNo: async () => {
     const response = await api.get("/next-inward-no");
-    return response.data.nextInwardNo;
+    return response.data.nextNo;
   },
 
   /* =============================

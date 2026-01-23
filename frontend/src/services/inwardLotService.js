@@ -1,7 +1,8 @@
+// services/inwardLotService.js
 import axios from "axios";
 
-// ✅ Backend base URL (change if your port is different)
-const API_URL = "http://localhost:5000/api/lot-entries";
+// ✅ Backend base URL
+const API_URL = "http://localhost:5000/api/inward-lots"; // Update if your backend URL is different
 
 // ✅ Axios instance
 const api = axios.create({
@@ -11,7 +12,7 @@ const api = axios.create({
   },
 });
 
-// 🔐 Automatically attach JWT token from localStorage
+// 🔐 Attach JWT token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,121 +24,87 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Service object with all methods
-const lotEntryService = {
-  // 1. Get the NEXT auto-generated Lot No (e.g., UC/25-26/0270)
+const inwardLotService = {
+  /* =============================
+     GET NEXT LOT NO
+  ============================= */
   getNextLotNo: async () => {
-    try {
-      const response = await api.get("/next-lot-no");
-      return response.data.nextLotNo; // e.g., "UC/25-26/0270"
-    } catch (error) {
-      console.error("Error fetching next lot number:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to fetch next lot number"
-      );
-    }
+    const response = await api.get("/next-lot-no");
+    console.log(response);
+    return response.data.lotNo;
   },
 
-  // 2. Get all lot entries
+  /* =============================
+     GET ALL LOTS
+  ============================= */
   getAll: async () => {
-    try {
-      const response = await api.get("/");
-      return response.data.lotEntries; // array of lot entries
-    } catch (error) {
-      console.error("Error fetching lot entries:", error);
-      throw new Error("Failed to fetch lot entries");
-    }
+    const response = await api.get("/");
+    console.log(response);
+    return response.data; // returns array of lots
   },
 
-  // 3. Get single lot entry by ID
-  getById: async (id) => {
-    try {
-      const response = await api.get(`/${id}`);
-      return response.data.lotEntry;
-    } catch (error) {
-      console.error("Error fetching lot entry:", error);
-      throw new Error("Failed to fetch lot entry");
-    }
+  /* =============================
+     GET LOT BY LOT NO
+  ============================= */
+  getByLotNo: async (lotNo) => {
+    const response = await api.get(`/${lotNo}`);
+    return response.data;
   },
 
-  // 4. Create new lot entry
+  /* =============================
+     CREATE LOT
+  ============================= */
   create: async (data) => {
-    try {
-      const payload = {
-        lotNo: data.lotNo, // from getNextLotNo()
-        inwardId: Number(data.inwardId),
+    console.log(data);
+    const payload = {
+      inwardId:  Number(data.selectedInwardId) || 0,
+      lotNo: data.lotNo,
+      setNo: String(data.setNo) || null,
+      balesQty: Number(data.balesQty) || 0,
+grossWeight: Number(data.grossWeight) || 0,
+tareWeight: Number(data.tareWeight) || 0,
+nettWeight: Number(data.nettWeight) || 0,
+candyRate: Number(data.candyRate) || 0,
+quintalRate: Number(data.quintalRate) || 0,
+ratePerKg: Number(data.ratePerKg) || 0,
+invoiceValue: Number(data.invoiceValue) || 0,
+cessPaidAmount: 200
+    };
 
-        setNo: data.setNo || null,
-        cessPaidAmt: data.cessPaidAmt !== undefined ? Number(data.cessPaidAmt) : null,
-        lotDate: data.lotDate || null,
-        type: data.type || null,
-        godownId: data.godownId !== undefined ? Number(data.godownId) : null,
-        balesQty: data.balesQty !== undefined ? Number(data.balesQty) : null,
-
-        currency: data.currency || "RUPEES",
-        candyRate: data.candyRate !== undefined ? Number(data.candyRate) : null,
-        quintolRate: data.quintolRate !== undefined ? Number(data.quintolRate) : null,
-        rateKg: data.rateKg !== undefined ? Number(data.rateKg) : null,
-        invoiceValue: data.invoiceValue !== undefined ? Number(data.invoiceValue) : null,
-      };
-
-      const response = await api.post("/", payload);
-      return response.data.lotEntry;
-    } catch (error) {
-      console.error("Error creating lot entry:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to create lot entry"
-      );
-    }
+    const response = await api.post("/", payload);
+    return response.data.lot;
   },
 
-  // 5. Update existing lot entry
-  update: async (id, data) => {
-    try {
-      const payload = {
-        lotNo: data.lotNo,
-        inwardId: data.inwardId !== undefined ? Number(data.inwardId) : undefined,
+  /* =============================
+     UPDATE LOT
+  ============================= */
+  update: async (lotNo, data) => {
+    const payload = {
+      inwardNo: data.inwardNo,
+      lotNo: data.lotNo,
+      setNo: data.setNo || null,
+      balesQty: data.balesQty,
+      cessPaidAmount: data.cessPaidAmount || 0,
+      grossWeight: data.grossWeight,
+      tareWeight: data.tareWeight,
+      nettWeight: data.nettWeight,
+      candyRate: data.candyRate,
+      quintalRate: data.quintalRate,
+      ratePerKg: data.ratePerKg,
+      invoiceValue: data.invoiceValue,
+    };
 
-        setNo: data.setNo !== undefined ? data.setNo : undefined,
-        cessPaidAmt:
-          data.cessPaidAmt !== undefined ? Number(data.cessPaidAmt) : undefined,
-        lotDate: data.lotDate !== undefined ? data.lotDate : undefined,
-        type: data.type !== undefined ? data.type : undefined,
-        godownId:
-          data.godownId !== undefined ? Number(data.godownId) : undefined,
-        balesQty:
-          data.balesQty !== undefined ? Number(data.balesQty) : undefined,
-
-        currency: data.currency !== undefined ? data.currency : undefined,
-        candyRate:
-          data.candyRate !== undefined ? Number(data.candyRate) : undefined,
-        quintolRate:
-          data.quintolRate !== undefined ? Number(data.quintolRate) : undefined,
-        rateKg: data.rateKg !== undefined ? Number(data.rateKg) : undefined,
-        invoiceValue:
-          data.invoiceValue !== undefined ? Number(data.invoiceValue) : undefined,
-      };
-
-      const response = await api.put(`/${id}`, payload);
-      return response.data.lotEntry;
-    } catch (error) {
-      console.error("Error updating lot entry:", error);
-      throw new Error(
-        error.response?.data?.message || "Failed to update lot entry"
-      );
-    }
+    const response = await api.put(`/${lotNo}`, payload);
+    return response.data.lot;
   },
 
-  // 6. Delete lot entry
-  delete: async (id) => {
-    try {
-      const response = await api.delete(`/${id}`);
-      return response.data; // { message: "Lot entry deleted successfully" }
-    } catch (error) {
-      console.error("Error deleting lot entry:", error);
-      throw new Error("Failed to delete lot entry");
-    }
+  /* =============================
+     DELETE LOT
+  ============================= */
+  delete: async (lotNo) => {
+    const response = await api.delete(`/${lotNo}`);
+    return response.data;
   },
 };
 
-export default lotEntryService;
+export default inwardLotService;

@@ -62,7 +62,8 @@ const AdminSidebar = () => {
     { to: "/admin/reports", icon: BarChart3, label: "Reports" },
     { to:"/admin/purchase-order", icon:Package,label:"Purchase Order"},
     { to:"/admin/inward-entries",icon:Package,label:"Inward Entries"},
-    { to:"/admin/inward-lot",icon:Package,label:"Inward Lot"}
+    { to:"/admin/inward-lot",icon:Package,label:"Inward Lot"},
+    { to:"/admin/issue",icon:Package,label:"Issue"}
   ];
 
   const handleLogout = async () => {

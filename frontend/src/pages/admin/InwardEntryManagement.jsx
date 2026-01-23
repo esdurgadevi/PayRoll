@@ -261,7 +261,7 @@ const InwardEntryManagement = () => {
     try {
       setInwardNoLoading(true);
       const response = await inwardEntryService.getNextInwardNo();
-      
+      console.log(response);
       setFormData(prev => ({
         ...prev,
         inwardNo: response || ''
