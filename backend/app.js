@@ -23,7 +23,8 @@ import purchaseOrderRoutes from './routes/purchaseOrderRoutes.js';
 import inwardEntryRoutes from './routes/inwardEntryRoutes.js';
 import inwardLotsRoutes from './routes/inwardLotRoutes.js';
 import inwardLotWeightmentRoutes from './routes/inwardLotWeightmentRoutes.js';
-import issueEntryRoutes from './routes/issueEntryRoutes.js';
+import issueRoutes from "./routes/issueRoutes.js";
+
 const app = express();
 
 app.use(cors());
@@ -52,5 +53,5 @@ app.use("/api/purchase-orders", purchaseOrderRoutes);
 app.use("/api/inward-entries", inwardEntryRoutes);
 app.use("/api/inward-lots",inwardLotsRoutes);
 app.use("/api/weightments",inwardLotWeightmentRoutes)
-app.use("/api/issues",issueEntryRoutes)
+app.use("/api/issues",issueRoutes);
 export default app;

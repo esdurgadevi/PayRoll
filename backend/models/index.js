@@ -24,7 +24,8 @@ import PurchaseOrderModel from "./purchaseOrder.js";
 import InwardEntryModel from "./inwardEntry.js";
 import InwardLotModel from "./inwardLot.js";
 import InwardLotWeightmentModel from "./inwardLotWeightment.js";
-import IssueModel from "./issueEntry.js";
+import IssueModel from "./Issue.js";
+import IssueItemModel from "./IssueItem.js";
 
 const db = {};
 db.sequelize = sequelize;
@@ -53,6 +54,7 @@ db.InwardEntry = InwardEntryModel(sequelize);
 db.InwardLot = InwardLotModel(sequelize);
 db.InwardLotWeightment = InwardLotWeightmentModel(sequelize);
 db.Issue = IssueModel(sequelize);
+db.IssueItem = IssueItemModel(sequelize);
 
 db.State.hasMany(db.Station, {
   foreignKey: "stateId",
@@ -218,10 +220,6 @@ db.InwardEntry.belongsTo(db.Godown, {
   as: "godown",
 });
 
-// db.InwardEntry.hasMany(db.InwardLot, {
-//   foreignKey: "inwardId",
-//   as: "inwardLots",
-// });
 db.InwardEntry.hasMany(db.InwardLot, {
   foreignKey: "inwardId",
 });
@@ -240,25 +238,15 @@ db.InwardLotWeightment.belongsTo(db.InwardLot, {
   as: "inwardLot",
 });
 
+//issue
+db.Issue.hasMany(db.IssueItem, {
+  foreignKey: "issueId",
+});
 
+db.IssueItem.belongsTo(db.Issue, {
+  foreignKey: "issueId",
+});
 
-// Issue ↔ IssueItem
-// db.Issue.hasMany(db.IssueItem, {
-//   foreignKey: "issueId",
-// });
-
-// db.IssueItem.belongsTo(db.Issue, {
-//   foreignKey: "issueId",
-// });
-
-// // InwardLot ↔ IssueItem
-// db.InwardLot.hasMany(db.IssueItem, {
-//   foreignKey: "lotNo",
-//   sourceKey: "lotNo",
-// });
-
-
-/* Issue relations */
 db.Issue.belongsTo(db.MixingGroup, {
   foreignKey: "mixingGroupId",
   as: "mixingGroup",
@@ -269,9 +257,9 @@ db.Issue.belongsTo(db.MixingGroup, {
   as: "toMixingGroup",
 });
 
-db.Issue.belongsTo(db.InwardLot, {
-  foreignKey: "lotId",
-  as: "lot",
+db.IssueItem.belongsTo(db.InwardLotWeightment, {
+  foreignKey: "weightmentId",
 });
+
 
 export default db;
