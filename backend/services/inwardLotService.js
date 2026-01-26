@@ -20,7 +20,7 @@ export const getAll = async () => {
 };
 
 export const getByLotNo = async (lotNo) => {
-  const lot = await InwardLot.findOne({ where: { lotNo } });
+  const lot = await InwardLot.findOne({ where: { lotNo,isIssued:false } });
   if (!lot) throw new Error("Lot not found");
   return lot;
 };

@@ -24,7 +24,7 @@ export const create = async (lotNo, rows) => {
 
 export const getAll = async (lotNo) => {
   return await InwardLotWeightment.findAll({
-    where: { lotNo },
+    where: { lotNo,isIssued:false },
     order: [["baleNo", "ASC"]],
   });
 };

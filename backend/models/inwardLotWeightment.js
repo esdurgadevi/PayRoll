@@ -48,6 +48,10 @@ const InwardLotWeightmentModel = (sequelize) => {
         type: DataTypes.DECIMAL(12, 3),
         allowNull: true,
       },
+      isIssued: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      }
     },
     {
       tableName: "inward_lot_weightments",

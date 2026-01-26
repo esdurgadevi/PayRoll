@@ -1,6 +1,7 @@
 import db from "../models/index.js";
 
 const {
+  sequelize,  
   Issue,
   IssueItem,
   MixingGroup,
@@ -9,57 +10,79 @@ const {
 
 /* CREATE ISSUE + ITEMS */
 export const create = async (data) => {
-  const {
-    issueNumber,
-    issueDate,
-    mixingNo,
-    mixingGroupId,
-    toMixingGroupId,
-    items,
-  } = data;
+  const transaction = await sequelize.transaction();
 
-  if (
-    !issueNumber ||
-    !issueDate ||
-    !mixingNo ||
-    !mixingGroupId ||
-    !toMixingGroupId ||
-    !Array.isArray(items) ||
-    items.length === 0
-  ) {
-    throw new Error("Missing required fields");
-  }
+  try {
+    const {
+      issueNumber,
+      issueDate,
+      mixingNo,
+      mixingGroupId,
+      toMixingGroupId,
+      items,
+    } = data;
 
-  // FK validation
-  const mg = await MixingGroup.findByPk(mixingGroupId);
-  const tmg = await MixingGroup.findByPk(toMixingGroupId);
-  if (!mg || !tmg) {
-    throw new Error("Invalid mixing group");
-  }
-
-  const issue = await Issue.create({
-    issueNumber,
-    issueDate,
-    mixingNo,
-    mixingGroupId,
-    toMixingGroupId,
-    issueQty: items.length,
-  });
-
-  for (const item of items) {
-    const weightment = await InwardLotWeightment.findByPk(item.weightmentId);
-    if (!weightment) {
-      throw new Error("Invalid weightmentId");
+    if (
+      !issueNumber ||
+      !issueDate ||
+      !mixingNo ||
+      !mixingGroupId ||
+      !toMixingGroupId ||
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
+      throw new Error("Missing required fields");
     }
 
-    await IssueItem.create({
-      issueId: issue.id,
-      weightmentId: item.weightmentId,
-      issueWeight: item.issueWeight,
-    });
-  }
+    const issue = await Issue.create(
+      {
+        issueNumber,
+        issueDate,
+        mixingNo,
+        mixingGroupId,
+        toMixingGroupId,
+        issueQty: items.length,
+      },
+      { transaction }
+    );
 
-  return issue;
+    for (const item of items) {
+      const weightment = await InwardLotWeightment.findByPk(
+        item.weightmentId,
+        { transaction }
+      );
+
+      if (!weightment) {
+        throw new Error("Invalid weightmentId");
+      }
+
+      if (weightment.isIssued) {
+        throw new Error(`Weightment ${item.weightmentId} already issued`);
+      }
+
+      await IssueItem.create(
+        {
+          issueId: issue.id,
+          weightmentId: item.weightmentId,
+          issueWeight: item.issueWeight,
+        },
+        { transaction }
+      );
+
+      // 🔴 Mark weightment as issued
+      await weightment.update(
+        { isIssued: true },
+        { transaction }
+      );
+    }
+
+    await transaction.commit();
+    return issue;
+
+  } catch (error) {
+    await transaction.rollback();
+    throw error;
+  }
 };
 
 /* GET ALL */
