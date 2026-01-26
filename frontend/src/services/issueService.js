@@ -35,6 +35,7 @@ const issueService = {
   // 📄 Get All Issues
   getAll: async () => {
     const response = await api.get("/");
+    console.log(response);
     return response.data.issues;
   },
 
