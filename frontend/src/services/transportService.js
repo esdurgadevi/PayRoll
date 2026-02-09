@@ -52,10 +52,6 @@ const transportService = {
     const response = await api.post("/", payload);
     return response.data.transport;
   },
-  getNextCode: async () => {
-    const res = await api.get("/next-code");
-    return res.data.nextCode;
-  },
   // 🔹 Update transport
   update: async (id, data) => {
     const payload = {

@@ -52,6 +52,11 @@ const wasteMasterService = {
     const response = await api.post("/", payload);
     return response.data.wasteMaster;
   },
+   getNextCode: async () => {
+    const res = await api.get("/next-code");
+    console.log(res.data.nextCode);
+    return res.data.nextCode;
+  },
 
   // 🔹 Update waste master
   update: async (id, data) => {

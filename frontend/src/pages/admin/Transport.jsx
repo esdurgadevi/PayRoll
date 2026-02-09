@@ -184,14 +184,14 @@ const Transport = () => {
   const openCreateModal = async () => {
     resetForm();
     try {
-            const nextCode = await transportService.getNextCode();
-            setFormData((prev) => ({
-              ...prev,
-              code: nextCode,
-            }));
-          } catch (error) {
-            setError("Failed to generate supplier code");
-          }
+      const nextCode = await transportService.getNextCode();
+      setFormData((prev) => ({
+      ...prev,
+      transportCode: nextCode,
+      }));
+    } catch (error) {   
+            setError("Failed to generate Transport code");
+    }
     setShowModal(true);
   };
 

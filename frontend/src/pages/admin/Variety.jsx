@@ -301,8 +301,17 @@ const Variety = () => {
     setViewingVariety(null);
   };
 
-  const openCreateModal = () => {
+  const openCreateModal = async () => {
     resetForm();
+    try {
+      const nextCode = await varietyService.getNextCode();
+      setFormData((prev) => ({
+      ...prev,
+      code: nextCode,
+      }));
+    } catch (error) {   
+            setError("Failed to generate Transport code");
+    }
     setShowModal(true);
   };
 

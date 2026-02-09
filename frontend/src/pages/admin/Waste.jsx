@@ -402,8 +402,17 @@ const WasteMaster = () => {
     setViewingWasteMaster(null);
   };
 
-  const openCreateModal = () => {
+  const openCreateModal = async () => {
     resetForm();
+    try {
+      const nextCode = await wasteMasterService.getNextCode();
+      setFormData((prev) => ({
+      ...prev,
+      code: nextCode,
+      }));
+    } catch (error) {   
+            setError("Failed to generate Transport code");
+    }
     setShowModal(true);
   };
 
@@ -752,7 +761,7 @@ const WasteMaster = () => {
                         min="1"
                         className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Enter unique waste master code"
-                        disabled={editingWasteMaster}
+                        disabled
                       />
                     </div>
                     {editingWasteMaster && (

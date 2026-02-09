@@ -30,7 +30,10 @@ const varietyService = {
     const response = await api.get("/");
     return response.data.varieties; // { varieties }
   },
-
+  getNextCode: async () => {
+    const res = await api.get("/next-code");
+    return res.data.nextCode;
+  },
   // 🔹 Get variety by ID
   getById: async (id) => {
     const response = await api.get(`/${id}`);

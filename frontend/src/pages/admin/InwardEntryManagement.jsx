@@ -119,8 +119,8 @@ const InwardEntryManagement = () => {
     // Weight and quantity
     balesQty: '',
     freight: '',
-    cooly: '',  // Changed from coolyBale
-    bale: '',   // Changed from coolyBale
+    cooly: '',
+    bale: '',
     
     // Tax details (rates only - amounts will be calculated)
     sgst: '',
@@ -149,6 +149,33 @@ const InwardEntryManagement = () => {
   // Refs for closing dropdowns
   const purchaseOrderRef = useRef(null);
   const godownRef = useRef(null);
+
+  // Tax rates configuration
+  const taxRates = {
+    Upcountry: {
+      sgst: 0,
+      cgst: 0,
+      igst: 5
+    },
+    Fought: {
+      sgst: 2.5,
+      cgst: 2.5,
+      igst: 0
+    }
+  };
+
+  // Apply tax rates based on type selection
+  useEffect(() => {
+    if (formData.type && taxRates[formData.type]) {
+      const rates = taxRates[formData.type];
+      setFormData(prev => ({
+        ...prev,
+        sgst: rates.sgst,
+        cgst: rates.cgst,
+        igst: rates.igst
+      }));
+    }
+  }, [formData.type]);
 
   // Load all data on component mount
   useEffect(() => {
@@ -456,12 +483,25 @@ const InwardEntryManagement = () => {
       return; // Don't allow changes when creating
     }
     
+    // Handle type change - tax rates will be updated via useEffect
+    if (name === 'type') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+      return;
+    }
+    
+    // Prevent manual changes to tax fields
+    if (name === 'sgst' || name === 'cgst' || name === 'igst') {
+      return; // Disable manual editing
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : 
               (name === 'paymentDays' || name === 'candyRate' || name === 'commisValue' || 
                name === 'balesQty' || name === 'freight' || name === 'cooly' || name === 'bale' ||
-               name === 'sgst' || name === 'cgst' || name === 'igst' ||
                name === 'grossWeight' || name === 'tareWeight' || name === 'nettWeight' || 
                name === 'comm')
         ? (value === '' ? '' : parseFloat(value) || '')
@@ -652,8 +692,8 @@ const InwardEntryManagement = () => {
       godownName: entry.godownName || '',
       balesQty: entry.balesQty || '',
       freight: entry.freight || '',
-      cooly: entry.cooly || '',  // Changed from coolyBale
-      bale: entry.bale || '',    // Changed from coolyBale
+      cooly: entry.cooly || '',
+      bale: entry.bale || '',
       sgst: entry.sgst || '',
       cgst: entry.cgst || '',
       igst: entry.igst || '',
@@ -847,11 +887,11 @@ const InwardEntryManagement = () => {
       godownName: '',
       balesQty: '',
       freight: '',
-      cooly: '',  // Changed from coolyBale
-      bale: '',   // Changed from coolyBale
-      sgst: '',
-      cgst: '',
-      igst: '',
+      cooly: '',
+      bale: '',
+      sgst: taxRates.Upcountry.sgst,
+      cgst: taxRates.Upcountry.cgst,
+      igst: taxRates.Upcountry.igst,
       grossWeight: '',
       tareWeight: '',
       nettWeight: '',
@@ -915,6 +955,16 @@ const InwardEntryManagement = () => {
 
   // Get tax amounts for display
   const taxAmounts = calculateTaxAmounts();
+
+  // Get tax description based on type
+  const getTaxDescription = () => {
+    if (formData.type === 'Upcountry') {
+      return "IGST 5% (Upcountry Transaction)";
+    } else if (formData.type === 'Fought') {
+      return "SGST 2.5% + CGST 2.5% (Fought Transaction)";
+    }
+    return "";
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
@@ -1204,11 +1254,6 @@ const InwardEntryManagement = () => {
                               />
                             )}
                           </div>
-                          {!editingEntry && formData.inwardNo && (
-                            <p className="mt-1 text-xs text-green-600">
-                              ✓ Inward number will be auto-generated: {formData.inwardNo}
-                            </p>
-                          )}
                         </div>
 
                         {/* Purchase Order Selection */}
@@ -1828,115 +1873,122 @@ const InwardEntryManagement = () => {
 
                     {/* Tax Details */}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <h4 className="text-lg font-semibold text-gray-800 mb-4">Tax Details</h4>
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-gray-800">Tax Details</h4>
+                        <div className="text-sm font-medium text-blue-600">
+                          {getTaxDescription()}
+                        </div>
+                      </div>
                       <div className="space-y-4">
-                        {/* SGST */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              SGST %
-                            </label>
-                            <div className="relative">
-                              <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                              <input
-                                type="number"
-                                name="sgst"
-                                value={formData.sgst}
-                                onChange={handleInputChange}
-                                min="0"
-                                max="100"
-                                step="0.01"
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="SGST %"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              SGST Amount
-                            </label>
-                            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
-                              <div className="text-gray-700">
-                                ₹{taxAmounts.sgstAmount.toFixed(2)}
+                        {/* SGST - Only shown for Fought */}
+                        {formData.type === 'Fought' && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                SGST %
+                              </label>
+                              <div className="relative">
+                                <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                  type="number"
+                                  name="sgst"
+                                  value={formData.sgst}
+                                  readOnly
+                                  className="w-full pl-10 pr-4 py-2 border border-gray-300 bg-gray-100 text-gray-700 rounded-lg cursor-not-allowed"
+                                  placeholder="SGST %"
+                                />
                               </div>
-                              <div className="text-xs text-gray-500">
-                                (Candy Rate × {formData.sgst || 0}%)
+                              <div className="text-xs text-gray-500 mt-1">
+                                Fixed rate for Fought transactions
                               </div>
                             </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                SGST Amount
+                              </label>
+                              <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+                                <div className="text-gray-700">
+                                  ₹{taxAmounts.sgstAmount.toFixed(2)}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  (Candy Rate × {formData.sgst || 0}%)
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
 
-                        {/* CGST */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              CGST %
-                            </label>
-                            <div className="relative">
-                              <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                              <input
-                                type="number"
-                                name="cgst"
-                                value={formData.cgst}
-                                onChange={handleInputChange}
-                                min="0"
-                                max="100"
-                                step="0.01"
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="CGST %"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              CGST Amount
-                            </label>
-                            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
-                              <div className="text-gray-700">
-                                ₹{taxAmounts.cgstAmount.toFixed(2)}
+                        {/* CGST - Only shown for Fought */}
+                        {formData.type === 'Fought' && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                CGST %
+                              </label>
+                              <div className="relative">
+                                <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                  type="number"
+                                  name="cgst"
+                                  value={formData.cgst}
+                                  readOnly
+                                  className="w-full pl-10 pr-4 py-2 border border-gray-300 bg-gray-100 text-gray-700 rounded-lg cursor-not-allowed"
+                                  placeholder="CGST %"
+                                />
                               </div>
-                              <div className="text-xs text-gray-500">
-                                (Candy Rate × {formData.cgst || 0}%)
+                              <div className="text-xs text-gray-500 mt-1">
+                                Fixed rate for Fought transactions
                               </div>
                             </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                CGST Amount
+                              </label>
+                              <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+                                <div className="text-gray-700">
+                                  ₹{taxAmounts.cgstAmount.toFixed(2)}
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  (Candy Rate × {formData.cgst || 0}%)
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        )}
 
-                        {/* IGST */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              IGST %
-                            </label>
-                            <div className="relative">
-                              <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                              <input
-                                type="number"
-                                name="igst"
-                                value={formData.igst}
-                                onChange={handleInputChange}
-                                min="0"
-                                max="100"
-                                step="0.01"
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                placeholder="IGST %"
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              IGST Amount
-                            </label>
-                            <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
-                              <div className="text-gray-700">
-                                ₹{taxAmounts.igstAmount.toFixed(2)}
+                        {/* IGST - Only shown for Upcountry */}
+                        {formData.type === 'Upcountry' && (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                IGST %
+                              </label>
+                              <div className="relative">
+                                <Percent className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <input
+                                  type="number"
+                                  name="igst"
+                                  value={formData.igst}
+                                  readOnly
+                                  className="w-full pl-10 pr-4 py-2 border border-gray-300 bg-gray-100 text-gray-700 rounded-lg cursor-not-allowed"
+                                  placeholder="IGST %"
+                                />
                               </div>
-                              <div className="text-xs text-gray-500">
-                                (Candy Rate × {formData.igst || 0}%)
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                IGST Amount
+                              </label>
+                              <div className="px-4 py-2 bg-gray-100 border border-gray-300 rounded-lg">
+                                <div className="text-gray-700">
+                                  ₹{taxAmounts.igstAmount.toFixed(2)}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        )}
+
+                       
                       </div>
                     </div>
 
@@ -2189,44 +2241,57 @@ const InwardEntryManagement = () => {
 
                     {/* Tax Details */}
                     <div className="bg-gray-50 p-4 rounded-lg">
-                      <h5 className="text-lg font-semibold text-gray-800 mb-3">Tax Details</h5>
+                      <h5 className="text-lg font-semibold text-gray-800 mb-3">Tax Details ({viewingEntry.type})</h5>
                       <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="text-sm text-gray-500">SGST %</div>
-                            <div className="font-medium text-gray-900">
-                              {viewingEntry.sgst || 0}%
+                        {viewingEntry.type === 'Upcountry' ? (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">IGST %</div>
+                              <div className="font-medium text-gray-900">
+                                {viewingEntry.igst || 5}%
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">IGST Amount</div>
+                              <div className="font-medium text-gray-900">
+                                ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.igst || 5) / 100)).toFixed(2)}
+                              </div>
                             </div>
                           </div>
-                          <div>
-                            <div className="text-sm text-gray-500">SGST Amount</div>
-                            <div className="font-medium text-gray-900">
-                              ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.sgst || 0) / 100)).toFixed(2)}
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-sm text-gray-500">SGST %</div>
+                              <div className="font-medium text-gray-900">
+                                {viewingEntry.sgst || 2.5}%
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">SGST Amount</div>
+                              <div className="font-medium text-gray-900">
+                                ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.sgst || 2.5) / 100)).toFixed(2)}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">CGST %</div>
+                              <div className="font-medium text-gray-900">
+                                {viewingEntry.cgst || 2.5}%
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-sm text-gray-500">CGST Amount</div>
+                              <div className="font-medium text-gray-900">
+                                ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.cgst || 2.5) / 100)).toFixed(2)}
+                              </div>
                             </div>
                           </div>
-                          <div>
-                            <div className="text-sm text-gray-500">CGST %</div>
-                            <div className="font-medium text-gray-900">
-                              {viewingEntry.cgst || 0}%
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">CGST Amount</div>
-                            <div className="font-medium text-gray-900">
-                              ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.cgst || 0) / 100)).toFixed(2)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">IGST %</div>
-                            <div className="font-medium text-gray-900">
-                              {viewingEntry.igst || 0}%
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-500">IGST Amount</div>
-                            <div className="font-medium text-gray-900">
-                              ₹{((viewingEntry.candyRate || 0) * ((viewingEntry.igst || 0) / 100)).toFixed(2)}
-                            </div>
+                        )}
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="text-sm font-medium text-blue-800">
+                            {viewingEntry.type === 'Upcountry' ? 
+                              `Total IGST: ₹${((viewingEntry.candyRate || 0) * ((viewingEntry.igst || 5) / 100)).toFixed(2)}` :
+                              `Combined GST: ₹${((viewingEntry.candyRate || 0) * (((viewingEntry.sgst || 2.5) + (viewingEntry.cgst || 2.5)) / 100)).toFixed(2)}`
+                            }
                           </div>
                         </div>
                       </div>
@@ -2330,5 +2395,6 @@ const InwardEntryManagement = () => {
     </div>
   );
 };
+
 
 export default InwardEntryManagement;
