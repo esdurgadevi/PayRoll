@@ -6,41 +6,7 @@ import varietyService from '../../services/varietyService';
 import mixingGroupService from '../../services/mixingGroupService';
 import stationService from '../../services/stationService';
 import companyBrokerService from '../../services/companyBrokerService';
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  Eye,
-  Download,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  X,
-  Hash,
-  Calendar,
-  Truck,
-  User,
-  Package,
-  Layers,
-  MapPin,
-  Building,
-  DollarSign,
-  Scale,
-  Percent,
-  Thermometer,
-  Wind,
-  Zap,
-  Droplets,
-  FileText,
-  Clock,
-  Filter,
-  ChevronDown,
-  Check,
-  XCircle,
-  ShoppingBag,
-  Loader2
-} from 'lucide-react';
+
 const PurchaseOrderManagement = () => {
   // States
   const [purchaseOrders, setPurchaseOrders] = useState([]);
@@ -970,7 +936,7 @@ switch(formData.selectedRateType) {
             onClick={openCreateModal}
             className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center transition-colors"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <span className="mr-2">+</span>
             Create New Order
           </button>
         </div>
@@ -979,20 +945,20 @@ switch(formData.selectedRateType) {
       {/* Messages */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start">
-          <AlertCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">⚠️</span>
           <div className="flex-1">{error}</div>
           <button onClick={() => setError('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
       
       {success && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-start">
-          <CheckCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">✓</span>
           <div className="flex-1">{success}</div>
           <button onClick={() => setSuccess('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
@@ -1003,7 +969,7 @@ switch(formData.selectedRateType) {
           {/* Search Input */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
               <input
                 type="text"
                 placeholder="Search by order number, supplier, variety, mixing group, or station..."
@@ -1016,7 +982,7 @@ switch(formData.selectedRateType) {
                   onClick={clearSearch}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-4 h-4" />
+                  ✕
                 </button>
               )}
             </div>
@@ -1028,7 +994,7 @@ switch(formData.selectedRateType) {
               onClick={exportOrders}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <span className="mr-2">📥</span>
               Export
             </button>
             <button
@@ -1044,7 +1010,7 @@ switch(formData.selectedRateType) {
               disabled={loading}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <span className={`mr-2 ${loading ? 'animate-spin inline-block' : ''}`}>↻</span>
               Refresh
             </button>
           </div>
@@ -1068,12 +1034,12 @@ switch(formData.selectedRateType) {
         {/* Loading State */}
         {loading ? (
           <div className="p-8 text-center">
-            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+            <span className="text-4xl text-blue-600 animate-spin inline-block mb-4">↻</span>
             <p className="text-gray-600">Loading purchase orders...</p>
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="p-8 text-center">
-            <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <span className="text-5xl text-gray-400 mb-4 inline-block">🛍️</span>
             <p className="text-gray-600 mb-2">No purchase orders found</p>
             {searchTerm ? (
               <p className="text-sm text-gray-500">
@@ -1120,7 +1086,7 @@ switch(formData.selectedRateType) {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                          <Hash className="w-4 h-4 text-blue-600" />
+                          <span className="text-blue-600">#</span>
                         </div>
                         <div>
                           <div className="font-mono font-semibold text-gray-900">
@@ -1140,14 +1106,14 @@ switch(formData.selectedRateType) {
                     <td className="px-6 py-4">
                       <div className="space-y-2">
                         <div className="flex items-center">
-                          <Building className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">🏢</span>
                           <div className="text-sm font-medium text-gray-900 truncate">
                             {getSupplierName(order.supplierId)}
                           </div>
                         </div>
                         {order.brokerId && (
                           <div className="flex items-center">
-                            <User className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-400 mr-2">👤</span>
                             <div className="text-sm text-gray-600 truncate">
                               {getBrokerName(order.brokerId)}
                             </div>
@@ -1155,7 +1121,7 @@ switch(formData.selectedRateType) {
                         )}
                         {order.companyBrokerId && (
                           <div className="flex items-center">
-                            <Truck className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-400 mr-2">🚚</span>
                             <div className="text-sm text-gray-600 truncate">
                               {getCompanyBrokerName(order.companyBrokerId)}
                             </div>
@@ -1166,19 +1132,19 @@ switch(formData.selectedRateType) {
                     <td className="px-6 py-4">
                       <div className="space-y-2">
                         <div className="flex items-center">
-                          <Package className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">📦</span>
                           <div className="text-sm font-medium text-gray-900">
                             {getVarietyName(order.varietyId)}
                           </div>
                         </div>
                         <div className="flex items-center">
-                          <Layers className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">📊</span>
                           <div className="text-sm text-gray-600">
                             {getMixingGroupName(order.mixingGroupId)}
                           </div>
                         </div>
                         <div className="flex items-center">
-                          <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">📍</span>
                           <div className="text-sm text-gray-600">
                             {getStationName(order.stationId)}
                           </div>
@@ -1188,13 +1154,13 @@ switch(formData.selectedRateType) {
                     <td className="px-6 py-4">
                       <div className="space-y-2">
                         <div className="flex items-center">
-                          <Scale className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">⚖️</span>
                           <div className="text-sm font-medium text-gray-900">
                             {order.quantity} units
                           </div>
                         </div>
                         <div className="flex items-center">
-                          <DollarSign className="w-4 h-4 text-green-600 mr-2" />
+                          <span className="text-green-600 mr-2">💰</span>
                           <div className="text-sm text-green-700 font-semibold">
                             {(() => {
                               switch(order.selectedRateType) {
@@ -1224,21 +1190,21 @@ switch(formData.selectedRateType) {
                           onClick={() => handleView(order)}
                           className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center"
                         >
-                          <Eye className="w-3 h-3 mr-1" />
+                          <span className="mr-1">👁️</span>
                           View
                         </button>
                         <button
                           onClick={() => handleEdit(order)}
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
                         >
-                          <Edit2 className="w-3 h-3 mr-1" />
+                          <span className="mr-1">✏️</span>
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(order.id, order.orderNo)}
                           className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 flex items-center"
                         >
-                          <Trash2 className="w-3 h-3 mr-1" />
+                          <span className="mr-1">🗑️</span>
                           Delete
                         </button>
                       </div>
@@ -1268,7 +1234,7 @@ switch(formData.selectedRateType) {
                   }}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -1287,10 +1253,10 @@ switch(formData.selectedRateType) {
                             Order Number {!editingOrder && '(Auto-generated)'}
                           </label>
                           <div className="relative">
-                            <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
                             {orderNoLoading ? (
                               <div className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center">
-                                <Loader2 className="w-4 h-4 animate-spin mr-2 text-gray-400" />
+                                <span className="w-4 h-4 animate-spin inline-block mr-2 text-gray-400">↻</span>
                                 <span className="text-gray-500">Generating order number...</span>
                               </div>
                             ) : (
@@ -1315,7 +1281,7 @@ switch(formData.selectedRateType) {
                             Order Date *
                           </label>
                           <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">📅</span>
                             <input
                               type="date"
                               name="orderDate"
@@ -1333,7 +1299,7 @@ switch(formData.selectedRateType) {
                             Expected Delivery Date
                           </label>
                           <div className="relative">
-                            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">⏰</span>
                             <input
                               type="date"
                               name="expectedDeliveryDate"
@@ -1411,7 +1377,6 @@ switch(formData.selectedRateType) {
                     </div>
 
                     {/* Quantity and Rate Section */}
-                    {/* Quantity and Rate Section */}
 <div className="bg-gray-50 p-4 rounded-lg">
   <h4 className="text-lg font-semibold text-gray-800 mb-4">Quantity & Rate</h4>
   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1421,7 +1386,7 @@ switch(formData.selectedRateType) {
         Quantity *
       </label>
       <div className="relative">
-        <Scale className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">⚖️</span>
         <input
           type="number"
           name="quantity"
@@ -1442,7 +1407,7 @@ switch(formData.selectedRateType) {
     Candy Rate (₹/candy)
   </label>
   <div className="relative">
-    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">💰</span>
     <input
       type="number"
       name="candyRate"
@@ -1463,7 +1428,7 @@ switch(formData.selectedRateType) {
     Quintal Rate (₹/quintal)
   </label>
   <div className="relative">
-    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">💰</span>
     <input
       type="number"
       name="quintalRate"
@@ -1485,7 +1450,7 @@ switch(formData.selectedRateType) {
     Rate Per Kg (₹/kg) *
   </label>
   <div className="relative">
-    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">💰</span>
     <input
       type="number"
       name="ratePerKg"
@@ -1507,7 +1472,7 @@ switch(formData.selectedRateType) {
     Approx Lot Value (₹)
   </label>
   <div className="relative">
-    <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">💰</span>
     <input
       type="number"
       name="approxLotValue"
@@ -1591,7 +1556,7 @@ switch(formData.selectedRateType) {
                             Staple
                           </label>
                           <div className="relative">
-                            <Scale className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">⚖️</span>
                             <input
                               type="number"
                               name="staple"
@@ -1609,7 +1574,7 @@ switch(formData.selectedRateType) {
                             Moist (%)
                           </label>
                           <div className="relative">
-                            <Droplets className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">💧</span>
                             <input
                               type="number"
                               name="moist"
@@ -1628,7 +1593,7 @@ switch(formData.selectedRateType) {
                             Mic
                           </label>
                           <div className="relative">
-                            <Thermometer className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🌡️</span>
                             <input
                               type="number"
                               name="mic"
@@ -1646,7 +1611,7 @@ switch(formData.selectedRateType) {
                             Str
                           </label>
                           <div className="relative">
-                            <Wind className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">💨</span>
                             <input
                               type="number"
                               name="str"
@@ -1664,7 +1629,7 @@ switch(formData.selectedRateType) {
                             Rd
                           </label>
                           <div className="relative">
-                            <Zap className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">⚡</span>
                             <input
                               type="number"
                               name="rd"
@@ -1693,7 +1658,7 @@ switch(formData.selectedRateType) {
                             Supplier *
                           </label>
                           <div className="relative" ref={supplierRef}>
-                            <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">🏢</span>
                             <input
                               type="text"
                               value={supplierSearch}
@@ -1712,7 +1677,7 @@ switch(formData.selectedRateType) {
                                 onClick={clearSupplierSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1721,7 +1686,7 @@ switch(formData.selectedRateType) {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {supplierLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading suppliers...
                                   </div>
                                 ) : filteredSuppliers.length === 0 ? (
@@ -1745,7 +1710,7 @@ switch(formData.selectedRateType) {
                                           </div>
                                         </div>
                                         {formData.supplierId === supplier.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1765,7 +1730,7 @@ switch(formData.selectedRateType) {
                             Broker (Optional)
                           </label>
                           <div className="relative" ref={brokerRef}>
-                            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">👤</span>
                             <input
                               type="text"
                               value={brokerSearch}
@@ -1783,7 +1748,7 @@ switch(formData.selectedRateType) {
                                 onClick={clearBrokerSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1792,7 +1757,7 @@ switch(formData.selectedRateType) {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {brokerLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading brokers...
                                   </div>
                                 ) : filteredBrokers.length === 0 ? (
@@ -1816,7 +1781,7 @@ switch(formData.selectedRateType) {
                                           </div>
                                         </div>
                                         {formData.brokerId === broker.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1839,7 +1804,7 @@ switch(formData.selectedRateType) {
                             Variety *
                           </label>
                           <div className="relative" ref={varietyRef}>
-                            <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">📦</span>
                             <input
                               type="text"
                               value={varietySearch}
@@ -1858,7 +1823,7 @@ switch(formData.selectedRateType) {
                                 onClick={clearVarietySelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1867,7 +1832,7 @@ switch(formData.selectedRateType) {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {varietyLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading varieties...
                                   </div>
                                 ) : filteredVarieties.length === 0 ? (
@@ -1891,7 +1856,7 @@ switch(formData.selectedRateType) {
                                           </div>
                                         </div>
                                         {formData.varietyId === variety.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1911,7 +1876,7 @@ switch(formData.selectedRateType) {
                             Mixing Group *
                           </label>
                           <div className="relative" ref={mixingGroupRef}>
-                            <Layers className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">📊</span>
                             <input
                               type="text"
                               value={mixingGroupSearch}
@@ -1930,7 +1895,7 @@ switch(formData.selectedRateType) {
                                 onClick={clearMixingGroupSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1939,7 +1904,7 @@ switch(formData.selectedRateType) {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {mixingGroupLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading mixing groups...
                                   </div>
                                 ) : filteredMixingGroups.length === 0 ? (
@@ -1963,7 +1928,7 @@ switch(formData.selectedRateType) {
                                           </div>
                                         </div>
                                         {formData.mixingGroupId === group.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1983,7 +1948,7 @@ switch(formData.selectedRateType) {
                             Station *
                           </label>
                           <div className="relative" ref={stationRef}>
-                            <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">📍</span>
                             <input
                               type="text"
                               value={stationSearch}
@@ -2002,7 +1967,7 @@ switch(formData.selectedRateType) {
                                 onClick={clearStationSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -2011,7 +1976,7 @@ switch(formData.selectedRateType) {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {stationLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading stations...
                                   </div>
                                 ) : filteredStations.length === 0 ? (
@@ -2035,7 +2000,7 @@ switch(formData.selectedRateType) {
                                           </div>
                                         </div>
                                         {formData.stationId === station.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -2057,7 +2022,7 @@ switch(formData.selectedRateType) {
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <h4 className="text-lg font-semibold text-gray-800 mb-4">Remarks</h4>
                       <div className="relative">
-                        <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                        <span className="absolute left-3 top-3 text-gray-400">📝</span>
                         <textarea
                           name="remarks"
                           value={formData.remarks}
@@ -2136,7 +2101,7 @@ switch(formData.selectedRateType) {
                   onClick={() => setShowViewModal(false)}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -2146,17 +2111,17 @@ switch(formData.selectedRateType) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center">
-                      <Hash className="w-5 h-5 text-gray-400 mr-2" />
+                      <span className="text-gray-400 mr-2">#</span>
                       <h4 className="text-2xl font-bold text-gray-900">{viewingOrder.orderNo}</h4>
                     </div>
                     <div className="flex items-center mt-2 space-x-4">
                       <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                        <span className="text-gray-400 mr-1">📅</span>
                         <span className="text-sm text-gray-600">Order Date: {formatDate(viewingOrder.orderDate)}</span>
                       </div>
                       {viewingOrder.expectedDeliveryDate && (
                         <div className="flex items-center">
-                          <Clock className="w-4 h-4 text-gray-400 mr-1" />
+                          <span className="text-gray-400 mr-1">⏰</span>
                           <span className="text-sm text-gray-600">Expected Delivery: {formatDate(viewingOrder.expectedDeliveryDate)}</span>
                         </div>
                       )}
@@ -2353,15 +2318,22 @@ switch(formData.selectedRateType) {
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
                   <button
-  type="submit"
-  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50"
-  disabled={!formData.orderNo || !formData.orderDate || !formData.supplierId || !formData.varietyId || 
-           !formData.mixingGroupId || !formData.stationId || !formData.quantity ||
-           !formData.ratePerKg || parseFloat(formData.ratePerKg) <= 0}
->
-  {editingOrder ? 'Update Order' : 'Create Order'}
-</button>
-                   
+                    type="button"
+                    onClick={() => setShowViewModal(false)}
+                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowViewModal(false);
+                      handleEdit(viewingOrder);
+                    }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                  >
+                    Edit Order
+                  </button>
                 </div>
               </div>
             </div>

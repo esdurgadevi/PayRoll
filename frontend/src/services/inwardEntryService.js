@@ -24,9 +24,6 @@ api.interceptors.request.use(
 );
 
 const inwardEntryService = {
-  /* =============================
-     GET NEXT INWARD NO
-  ============================= */
   getNextInwardNo: async () => {
     const response = await api.get("/next-inward-no");
     return response.data.nextNo;

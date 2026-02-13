@@ -2,30 +2,6 @@ import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../services/authService";
 
-import {
-  LayoutDashboard,
-  MapPin,
-  Building2,
-  Truck,
-  GitMerge,
-  Route,
-  Layers,
-  ShieldCheck,
-  Warehouse,
-  Handshake,
-  FileText,
-  Package,
-  TruckIcon,
-  Box,
-  Trash2,
-  IndianRupee,
-  BarChart3,
-  LogOut,
-  Menu,
-  X,
-  ChevronDown,
-} from "lucide-react";
-
 const AdminSidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [openSection, setOpenSection] = useState("");
@@ -34,43 +10,43 @@ const AdminSidebar = () => {
   /* ---------------- MENU GROUPS ---------------- */
 
   const dashboardItem = [
-    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+    { to: "/admin/dashboard", icon: "📊", label: "Dashboard" },
   ];
 
   const masterItems = [
-    { to: "/admin/state", icon: MapPin, label: "State" },
-    { to: "/admin/station", icon: Building2, label: "Station" },
-    { to: "/admin/supplier", icon: Truck, label: "Supplier" },
-    { to: "/admin/broker", icon: Handshake, label: "Broker" },
-    { to: "/admin/mixing_group", icon: GitMerge, label: "Mixing Group" },
-    { to: "/admin/mixing_group_routes", icon: Route, label: "Mixing Group Routes" },
-    { to: "/admin/variety", icon: ShieldCheck, label: "Variety" },
-    { to: "/admin/godown", icon: Warehouse, label: "Godown" },
-    { to: "/admin/company-broker", icon: Handshake, label: "Company Broker" },
-    { to: "/admin/wc-sales", icon: FileText, label: "WC Sales Invoice" },
-    { to: "/admin/commodity", icon: Package, label: "Commodity" },
-    { to: "/admin/fibre", icon: Layers, label: "Fibre" },
-    { to: "/admin/transport", icon: TruckIcon, label: "Transport" },
-    { to: "/admin/packing-type", icon: Box, label: "Packing Type" },
-    { to: "/admin/waste", icon: Trash2, label: "Waste" },
-    { to: "/admin/waste-rates", icon: IndianRupee, label: "Waste Rate" },
-    { to: "/admin/waste-lot", icon: Package, label: "Waste Lot" },
-    { to: "/admin/cost-master", icon: IndianRupee, label: "Cost Master" },
-    { to: "/admin/reports", icon: BarChart3, label: "Reports" },
+    { to: "/admin/state", icon: "📍", label: "State" },
+    { to: "/admin/station", icon: "🏢", label: "Station" },
+    { to: "/admin/supplier", icon: "🚚", label: "Supplier" },
+    { to: "/admin/broker", icon: "🤝", label: "Broker" },
+    { to: "/admin/mixing_group", icon: "🔄", label: "Mixing Group" },
+    { to: "/admin/mixing_group_routes", icon: "🛣️", label: "Mixing Group Routes" },
+    { to: "/admin/variety", icon: "🛡️", label: "Variety" },
+    { to: "/admin/godown", icon: "🏭", label: "Godown" },
+    { to: "/admin/company-broker", icon: "🤝", label: "Company Broker" },
+    { to: "/admin/wc-sales", icon: "📄", label: "WC Sales Invoice" },
+    { to: "/admin/commodity", icon: "📦", label: "Commodity" },
+    { to: "/admin/fibre", icon: "📊", label: "Fibre" },
+    { to: "/admin/transport", icon: "🚛", label: "Transport" },
+    { to: "/admin/packing-type", icon: "📦", label: "Packing Type" },
+    { to: "/admin/waste", icon: "🗑️", label: "Waste" },
+    { to: "/admin/waste-rates", icon: "💰", label: "Waste Rate" },
+    { to: "/admin/waste-lot", icon: "📦", label: "Waste Lot" },
+    { to: "/admin/cost-master", icon: "💰", label: "Cost Master" },
+    { to: "/admin/reports", icon: "📊", label: "Reports" },
   ];
 
   const cottonTransactionItems = [
-    { to: "/admin/purchase-order", icon: Package, label: "Purchase Order" },
-    { to: "/admin/inward-entries", icon: Package, label: "Inward Entries" },
-    { to: "/admin/inward-lot", icon: Package, label: "Inward Lot" },
-    { to: "/admin/issue", icon: Package, label: "Issue" },
+    { to: "/admin/purchase-order", icon: "📦", label: "Purchase Order" },
+    { to: "/admin/inward-entries", icon: "📦", label: "Inward Entries" },
+    { to: "/admin/inward-lot", icon: "📦", label: "Inward Lot" },
+    { to: "/admin/issue", icon: "📦", label: "Issue" },
   ];
 
   const wasteTransactionItems = [
-    { to: "/admin/waste1", icon: Package, label: "Waste1" },
-    { to: "/admin/sales-order", icon: Package, label: "Waste Sales Order" },
-    { to: "/admin/waste-order", icon: Package, label: "Waste Cotton Invoice" },
-    { to: "/admin/waste-entry", icon: Package, label: "Waste Entry" },
+    { to: "/admin/waste1", icon: "📦", label: "Waste1" },
+    { to: "/admin/sales-order", icon: "📦", label: "Waste Sales Order" },
+    { to: "/admin/waste-order", icon: "📦", label: "Waste Cotton Invoice" },
+    { to: "/admin/waste-entry", icon: "📦", label: "Waste Entry" },
   ];
 
   /* ---------------- LOGOUT ---------------- */
@@ -100,11 +76,11 @@ const AdminSidebar = () => {
         {/* Header */}
         <div className="flex items-center justify-between h-20 px-6 border-b border-[#1d1b31]">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-8 h-8 text-indigo-500" />
+            <span className="text-2xl text-indigo-500">🛡️</span>
             <span className="text-xl font-bold">KR Exports RawMaterial</span>
           </div>
           <button className="lg:hidden" onClick={() => setIsOpen(false)}>
-            <X />
+            <span className="text-xl">✕</span>
           </button>
         </div>
 
@@ -151,7 +127,7 @@ const AdminSidebar = () => {
                 className="flex items-center gap-4 px-4 py-3 w-full
                 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl"
               >
-                <LogOut className="w-5 h-5" />
+                <span className="text-lg">🚪</span>
                 Logout
               </button>
             </li>
@@ -165,7 +141,7 @@ const AdminSidebar = () => {
           onClick={() => setIsOpen(true)}
           className="fixed top-4 left-4 z-50 lg:hidden bg-[#11101d] p-2 rounded-lg"
         >
-          <Menu />
+          <span className="text-white text-xl">☰</span>
         </button>
       )}
     </>
@@ -182,7 +158,7 @@ const SidebarSection = ({ title, open, onClick, items, setIsOpen }) => (
       text-gray-300 hover:bg-white/10 rounded-xl"
     >
       <span>{title}</span>
-      <ChevronDown className={`transition ${open ? "rotate-180" : ""}`} />
+      <span className={`text-lg transition ${open ? "rotate-180 inline-block" : ""}`}>▼</span>
     </button>
 
     {open && (
@@ -211,7 +187,7 @@ const SidebarLink = ({ item, setIsOpen }) => {
           }`
         }
       >
-        <Icon className="w-5 h-5" />
+        <span className="text-lg">{Icon}</span>
         {item.label}
       </NavLink>
     </li>

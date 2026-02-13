@@ -1,17 +1,5 @@
 // frontend/src/pages/admin/WasteEntryPage.jsx
 import React, { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Edit2, 
-  Trash2, 
-  Save, 
-  X, 
-  Calendar,
-  Package,
-  Scale,
-  Building,
-  Filter
-} from 'lucide-react';
 import wasteEntryService from '../../services/wasteEntryService';
 
 const WasteEntryPage = () => {
@@ -302,7 +290,7 @@ const WasteEntryPage = () => {
             onClick={handleOpenCreateModal}
             className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-200"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <span className="mr-2">+</span>
             New Waste Entry
           </button>
         </div>
@@ -313,7 +301,7 @@ const WasteEntryPage = () => {
         <div className="bg-white rounded-xl shadow p-5">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-blue-100 text-blue-600">
-              <Package className="w-6 h-6" />
+              <span className="text-xl">📦</span>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total Entries</p>
@@ -325,7 +313,7 @@ const WasteEntryPage = () => {
         <div className="bg-white rounded-xl shadow p-5">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-green-100 text-green-600">
-              <Calendar className="w-6 h-6" />
+              <span className="text-xl">📅</span>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Today's Entries</p>
@@ -337,7 +325,7 @@ const WasteEntryPage = () => {
         <div className="bg-white rounded-xl shadow p-5">
           <div className="flex items-center">
             <div className="p-3 rounded-lg bg-purple-100 text-purple-600">
-              <Scale className="w-6 h-6" />
+              <span className="text-xl">⚖️</span>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Today's Total Weight</p>
@@ -412,14 +400,14 @@ const WasteEntryPage = () => {
                             className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50 transition"
                             title="Edit"
                           >
-                            <Edit2 className="w-4 h-4" />
+                            <span className="text-lg">✏️</span>
                           </button>
                           <button
                             onClick={() => handleDelete(entry._id)}
                             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50 transition"
                             title="Delete"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <span className="text-lg">🗑️</span>
                           </button>
                         </div>
                       </td>
@@ -445,7 +433,7 @@ const WasteEntryPage = () => {
                 onClick={handleCloseModal}
                 className="text-gray-400 hover:text-gray-600 transition"
               >
-                <X className="w-6 h-6" />
+                <span className="text-2xl">&times;</span>
               </button>
             </div>
 
@@ -508,7 +496,7 @@ const WasteEntryPage = () => {
                     onClick={addDetailRow}
                     className="flex items-center text-sm text-blue-600 hover:text-blue-800"
                   >
-                    <Plus className="w-4 h-4 mr-1" />
+                    <span className="mr-1">+</span>
                     Add Row
                   </button>
                 </div>
@@ -595,7 +583,7 @@ const WasteEntryPage = () => {
                                 onClick={() => removeDetailRow(index)}
                                 className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <span className="text-lg">🗑️</span>
                               </button>
                             )}
                           </td>
@@ -640,7 +628,7 @@ const WasteEntryPage = () => {
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4 mr-2" />
+                      <span className="mr-2">💾</span>
                       {isEditing ? 'Update Entry' : 'Create Entry'}
                     </>
                   )}

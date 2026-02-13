@@ -1,22 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import stateService from '../../services/stateService';
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  Eye,
-  Filter,
-  Download,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  X,
-  Hash,
-  Globe,
-  MapPin,
-  Building2
-} from 'lucide-react';
 
 const State = () => {
   // States
@@ -250,7 +233,7 @@ const State = () => {
             onClick={openCreateModal}
             className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center transition-colors"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <span className="mr-2">+</span>
             Add New State
           </button>
         </div>
@@ -259,20 +242,20 @@ const State = () => {
       {/* Messages */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start">
-          <AlertCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">⚠️</span>
           <div className="flex-1">{error}</div>
           <button onClick={() => setError('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
       
       {success && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-start">
-          <CheckCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">✓</span>
           <div className="flex-1">{success}</div>
           <button onClick={() => setSuccess('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
@@ -283,7 +266,7 @@ const State = () => {
           {/* Search Input */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
               <input
                 type="text"
                 placeholder="Search states by code or name..."
@@ -296,7 +279,7 @@ const State = () => {
                   onClick={clearSearch}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-4 h-4" />
+                  ✕
                 </button>
               )}
             </div>
@@ -308,7 +291,7 @@ const State = () => {
               onClick={exportStates}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <span className="mr-2">📥</span>
               Export
             </button>
             <button
@@ -316,7 +299,7 @@ const State = () => {
               disabled={loading}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <span className={`mr-2 ${loading ? 'animate-spin inline-block' : ''}`}>↻</span>
               Refresh
             </button>
           </div>
@@ -340,12 +323,12 @@ const State = () => {
         {/* Loading State */}
         {loading ? (
           <div className="p-8 text-center">
-            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+            <span className="text-4xl text-blue-600 animate-spin inline-block mb-4">↻</span>
             <p className="text-gray-600">Loading states...</p>
           </div>
         ) : filteredStates.length === 0 ? (
           <div className="p-8 text-center">
-            <Globe className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <span className="text-5xl text-gray-400 mb-4 inline-block">🌍</span>
             <p className="text-gray-600 mb-2">No states found</p>
             {searchTerm ? (
               <p className="text-sm text-gray-500">
@@ -389,7 +372,7 @@ const State = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                          <Hash className="w-4 h-4 text-blue-600" />
+                          <span className="text-blue-600">#</span>
                         </div>
                         <div>
                           <div className="font-mono font-semibold text-gray-900">
@@ -401,7 +384,7 @@ const State = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
-                        <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+                        <span className="text-gray-400 mr-2">📍</span>
                         <div className="text-sm font-medium text-gray-900">{state.state}</div>
                       </div>
                     </td>
@@ -427,21 +410,21 @@ const State = () => {
                           onClick={() => handleView(state)}
                           className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center"
                         >
-                          <Eye className="w-3 h-3 mr-1" />
+                          <span className="mr-1">👁️</span>
                           View
                         </button>
                         <button
                           onClick={() => handleEdit(state)}
                           className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
                         >
-                          <Edit2 className="w-3 h-3 mr-1" />
+                          <span className="mr-1">✏️</span>
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(state.id, state.state)}
                           className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 flex items-center"
                         >
-                          <Trash2 className="w-3 h-3 mr-1" />
+                          <span className="mr-1">🗑️</span>
                           Delete
                         </button>
                       </div>
@@ -471,7 +454,7 @@ const State = () => {
                   }}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -485,7 +468,7 @@ const State = () => {
                       <span className="text-xs text-gray-500 ml-1">(Unique numeric code)</span>
                     </label>
                     <div className="relative">
-                      <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
                       <input
                         type="number"
                         name="code"
@@ -509,7 +492,7 @@ const State = () => {
                       State Name *
                     </label>
                     <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">📍</span>
                       <input
                         type="text"
                         name="state"
@@ -581,7 +564,7 @@ const State = () => {
                   onClick={() => setShowViewModal(false)}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -589,7 +572,7 @@ const State = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-center mb-6">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Globe className="w-8 h-8 text-blue-600" />
+                    <span className="text-3xl text-blue-600">🌍</span>
                   </div>
                 </div>
 
@@ -598,7 +581,7 @@ const State = () => {
                     <div>
                       <label className="block text-xs font-medium text-gray-500 uppercase">Code</label>
                       <div className="mt-1 flex items-center">
-                        <Hash className="w-4 h-4 text-gray-400 mr-2" />
+                        <span className="text-gray-400 mr-2">#</span>
                         <span className="font-mono font-semibold text-gray-900">
                           {formatCode(viewingState.code)}
                         </span>
@@ -613,7 +596,7 @@ const State = () => {
                   <div>
                     <label className="block text-xs font-medium text-gray-500 uppercase">State Name</label>
                     <div className="mt-1 flex items-center">
-                      <MapPin className="w-4 h-4 text-gray-400 mr-2" />
+                      <span className="text-gray-400 mr-2">📍</span>
                       <span className="text-lg font-medium text-gray-900">{viewingState.state}</span>
                     </div>
                   </div>

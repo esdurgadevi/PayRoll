@@ -1,36 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import wasteLotService from '../../services/wasteLotService';
 import wasteMasterService from '../../services/wasteMasterService';
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  Eye,
-  Download,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  X,
-  Hash,
-  Layers,
-  Package,
-  Tag,
-  ChevronDown,
-  Check,
-  XCircle,
-  Box,
-  Filter,
-  Calendar,
-  Clock,
-  Archive,
-  CheckSquare,
-  Square,
-  Scale,
-  Barcode,
-  Building,
-  FileText
-} from 'lucide-react';
 
 const WasteLot = () => {
   // States
@@ -435,7 +405,7 @@ const WasteLot = () => {
             onClick={openCreateModal}
             className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center transition-colors"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <span className="mr-2">+</span>
             Create New Lot
           </button>
         </div>
@@ -444,20 +414,20 @@ const WasteLot = () => {
       {/* Messages */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start">
-          <AlertCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">⚠️</span>
           <div className="flex-1">{error}</div>
           <button onClick={() => setError('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
       
       {success && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-start">
-          <CheckCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">✓</span>
           <div className="flex-1">{success}</div>
           <button onClick={() => setSuccess('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
@@ -494,7 +464,7 @@ const WasteLot = () => {
           <div className="flex-1">
             <label className="block text-sm font-medium text-gray-700 mb-1">Search Lots</label>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
               <input
                 type="text"
                 placeholder="Search by lot number, waste type, department, or status..."
@@ -507,7 +477,7 @@ const WasteLot = () => {
                   onClick={clearSearch}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-4 h-4" />
+                  ✕
                 </button>
               )}
             </div>
@@ -519,7 +489,7 @@ const WasteLot = () => {
               onClick={exportLots}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <span className="mr-2">📥</span>
               Export
             </button>
             <button
@@ -530,7 +500,7 @@ const WasteLot = () => {
               disabled={loading}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <span className={`mr-2 ${loading ? 'animate-spin inline-block' : ''}`}>↻</span>
               Refresh
             </button>
           </div>
@@ -559,12 +529,12 @@ const WasteLot = () => {
         {/* Loading State */}
         {loading ? (
           <div className="p-8 text-center">
-            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+            <span className="text-4xl text-blue-600 animate-spin inline-block mb-4">↻</span>
             <p className="text-gray-600">Loading waste lots...</p>
           </div>
         ) : filteredLots.length === 0 ? (
           <div className="p-8 text-center">
-            <Box className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <span className="text-5xl text-gray-400 mb-4 inline-block">📦</span>
             <p className="text-gray-600 mb-2">No waste lots found</p>
             {searchTerm || activeFilter !== 'all' ? (
               <p className="text-sm text-gray-500">
@@ -616,7 +586,7 @@ const WasteLot = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                            <Hash className="w-4 h-4 text-blue-600" />
+                            <span className="text-blue-600">#</span>
                           </div>
                           <div>
                             <div className="font-mono font-semibold text-gray-900">
@@ -628,7 +598,7 @@ const WasteLot = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <Package className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">📦</span>
                           <div>
                             <div className="text-sm font-medium text-gray-900">
                               {master ? master.waste : 'Unknown Waste'}
@@ -641,7 +611,7 @@ const WasteLot = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <Building className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">🏢</span>
                           <div className="text-sm font-medium text-gray-900">
                             {master ? master.department : 'Unknown'}
                           </div>
@@ -649,7 +619,7 @@ const WasteLot = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center">
-                          <Scale className="w-4 h-4 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">⚖️</span>
                           <div className="text-sm font-medium text-gray-900">
                             {master ? `${master.wasteKg} kg` : 'N/A'}
                           </div>
@@ -662,12 +632,12 @@ const WasteLot = () => {
                         >
                           {lot.active ? (
                             <>
-                              <CheckSquare className="w-3 h-3 mr-1" />
+                              <span className="w-3 h-3 mr-1">☑</span>
                               Active
                             </>
                           ) : (
                             <>
-                              <Archive className="w-3 h-3 mr-1" />
+                              <span className="w-3 h-3 mr-1">📦</span>
                               Inactive
                             </>
                           )}
@@ -687,21 +657,21 @@ const WasteLot = () => {
                             onClick={() => handleView(lot)}
                             className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center"
                           >
-                            <Eye className="w-3 h-3 mr-1" />
+                            <span className="mr-1">👁️</span>
                             View
                           </button>
                           <button
                             onClick={() => handleEdit(lot)}
                             className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
                           >
-                            <Edit2 className="w-3 h-3 mr-1" />
+                            <span className="mr-1">✏️</span>
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(lot.id, lot.lotNo)}
                             className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 flex items-center"
                           >
-                            <Trash2 className="w-3 h-3 mr-1" />
+                            <span className="mr-1">🗑️</span>
                             Delete
                           </button>
                         </div>
@@ -732,7 +702,7 @@ const WasteLot = () => {
                   }}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -746,7 +716,7 @@ const WasteLot = () => {
                       <span className="text-xs text-gray-500 ml-1">(Unique identifier)</span>
                     </label>
                     <div className="relative">
-                      <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
                       <input
                         type="text"
                         name="lotNo"
@@ -766,7 +736,7 @@ const WasteLot = () => {
                       <span className="text-xs text-gray-500 ml-1">(Type to search from waste masters)</span>
                     </label>
                     <div className="relative" ref={wasteRef}>
-                      <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">📦</span>
                       <input
                         type="text"
                         value={wasteSearch}
@@ -782,7 +752,7 @@ const WasteLot = () => {
                           onClick={clearWasteSelection}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          <XCircle className="w-4 h-4" />
+                          ✕
                         </button>
                       )}
                       
@@ -791,7 +761,7 @@ const WasteLot = () => {
                         <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                           {wasteMasterLoading ? (
                             <div className="p-3 text-center text-gray-500">
-                              <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                              <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                               Loading waste types...
                             </div>
                           ) : filteredWasteMasters.length === 0 ? (
@@ -815,7 +785,7 @@ const WasteLot = () => {
                                     </div>
                                   </div>
                                   {formData.wasteMasterId === master.id && (
-                                    <Check className="w-4 h-4 text-blue-600" />
+                                    <span className="w-4 h-4 text-blue-600">✓</span>
                                   )}
                                 </div>
                               </div>
@@ -948,7 +918,7 @@ const WasteLot = () => {
                   onClick={() => setShowViewModal(false)}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -956,7 +926,7 @@ const WasteLot = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-center mb-6">
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Box className="w-8 h-8 text-blue-600" />
+                    <span className="text-3xl text-blue-600">📦</span>
                   </div>
                 </div>
 
@@ -975,7 +945,7 @@ const WasteLot = () => {
                     return master ? (
                       <div className="p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center mb-4">
-                          <Package className="w-5 h-5 text-gray-400 mr-2" />
+                          <span className="text-gray-400 mr-2">📦</span>
                           <h5 className="text-lg font-semibold text-gray-900">Waste Information</h5>
                         </div>
                         

@@ -3,39 +3,6 @@ import issueService from '../../services/issueService';
 import mixingGroupService from '../../services/mixingGroupService';
 import mixingService from '../../services/mixingService';
 import inwardLotService from '../../services/inwardLotService';
-import {
-  Search,
-  Plus,
-  Edit2,
-  Trash2,
-  Eye,
-  Download,
-  RefreshCw,
-  AlertCircle,
-  CheckCircle,
-  X,
-  Hash,
-  Calendar,
-  Package,
-  Layers,
-  Filter,
-  Box,
-  Scale,
-  FileText,
-  Check,
-  XCircle,
-  ChevronDown,
-  ArrowRight,
-  List,
-  CheckSquare,
-  Square,
-  ShoppingBag,
-  Loader2,
-  ClipboardCheck,
-  ClipboardList,
-  Package2,
-  Tag
-} from 'lucide-react';
 
 const IssueEntryManagement = () => {
   // States
@@ -762,7 +729,7 @@ const IssueEntryManagement = () => {
             onClick={openCreateModal}
             className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg flex items-center transition-colors"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <span className="mr-2">+</span>
             Create New Issue
           </button>
         </div>
@@ -771,20 +738,20 @@ const IssueEntryManagement = () => {
       {/* Messages */}
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg flex items-start">
-          <AlertCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">⚠️</span>
           <div className="flex-1">{error}</div>
           <button onClick={() => setError('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
       
       {success && (
         <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-start">
-          <CheckCircle className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
+          <span className="mr-2 mt-0.5 flex-shrink-0">✓</span>
           <div className="flex-1">{success}</div>
           <button onClick={() => setSuccess('')} className="ml-2">
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
       )}
@@ -795,7 +762,7 @@ const IssueEntryManagement = () => {
           {/* Search Input */}
           <div className="flex-1">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</span>
               <input
                 type="text"
                 placeholder="Search by issue number, mixing group, mixing no, or lot no..."
@@ -808,7 +775,7 @@ const IssueEntryManagement = () => {
                   onClick={clearSearch}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  <X className="w-4 h-4" />
+                  ✕
                 </button>
               )}
             </div>
@@ -820,7 +787,7 @@ const IssueEntryManagement = () => {
               onClick={exportIssues}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center"
             >
-              <Download className="w-4 h-4 mr-2" />
+              <span className="mr-2">📥</span>
               Export
             </button>
             <button
@@ -833,7 +800,7 @@ const IssueEntryManagement = () => {
               disabled={loading}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              <span className={`mr-2 ${loading ? 'animate-spin inline-block' : ''}`}>↻</span>
               Refresh
             </button>
           </div>
@@ -857,12 +824,12 @@ const IssueEntryManagement = () => {
         {/* Loading State */}
         {loading ? (
           <div className="p-8 text-center">
-            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+            <span className="text-4xl text-blue-600 animate-spin inline-block mb-4">↻</span>
             <p className="text-gray-600">Loading issue entries...</p>
           </div>
         ) : filteredIssues.length === 0 ? (
           <div className="p-8 text-center">
-            <ClipboardList className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <span className="text-5xl text-gray-400 mb-4 inline-block">📋</span>
             <p className="text-gray-600 mb-2">No issue entries found</p>
             {searchTerm ? (
               <p className="text-sm text-gray-500">
@@ -911,7 +878,7 @@ const IssueEntryManagement = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center">
                           <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center mr-3">
-                            <Hash className="w-4 h-4 text-blue-600" />
+                            <span className="text-blue-600">#</span>
                           </div>
                           <div>
                             <div className="font-mono font-semibold text-gray-900">
@@ -931,20 +898,20 @@ const IssueEntryManagement = () => {
                       <td className="px-6 py-4">
                         <div className="space-y-2">
                           <div className="flex items-center">
-                            <Layers className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-400 mr-2">📊</span>
                             <div className="text-sm font-medium text-gray-900">
                               {issue.mixingGroupName || `Group ${issue.mixingGroupId}`}
                             </div>
                           </div>
                           <div className="flex items-center">
-                            <ArrowRight className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-400 mr-2">→</span>
                             <div className="text-sm text-gray-600">
                               To: {issue.mixingName || `Mixing ${issue.toMixingGroupId}`}
                             </div>
                           </div>
                           {issue.mixingNo && (
                             <div className="flex items-center">
-                              <Tag className="w-4 h-4 text-gray-400 mr-2" />
+                              <span className="text-gray-400 mr-2">🏷️</span>
                               <div className="text-sm text-gray-500">
                                 Mixing No: {issue.mixingNo}
                               </div>
@@ -955,13 +922,13 @@ const IssueEntryManagement = () => {
                       <td className="px-6 py-4">
                         <div className="space-y-2">
                           <div className="flex items-center">
-                            <Box className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-400 mr-2">📦</span>
                             <div className="text-sm font-medium text-gray-900">
                               {balesCount} bales
                             </div>
                           </div>
                           <div className="flex items-center">
-                            <Scale className="w-4 h-4 text-gray-400 mr-2" />
+                            <span className="text-gray-400 mr-2">⚖️</span>
                             <div className="text-sm text-gray-600">
                               Total Weight: {formatNumber(totalWeight)} kg
                             </div>
@@ -984,21 +951,21 @@ const IssueEntryManagement = () => {
                             onClick={() => handleView(issue)}
                             className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 flex items-center"
                           >
-                            <Eye className="w-3 h-3 mr-1" />
+                            <span className="mr-1">👁️</span>
                             View
                           </button>
                           <button
                             onClick={() => handleEdit(issue)}
                             className="px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 flex items-center"
                           >
-                            <Edit2 className="w-3 h-3 mr-1" />
+                            <span className="mr-1">✏️</span>
                             Edit
                           </button>
                           <button
                             onClick={() => handleDelete(issue.id, issue.issueNumber || issue.issueNo)}
                             className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 flex items-center"
                           >
-                            <Trash2 className="w-3 h-3 mr-1" />
+                            <span className="mr-1">🗑️</span>
                             Delete
                           </button>
                         </div>
@@ -1029,7 +996,7 @@ const IssueEntryManagement = () => {
                   }}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -1048,10 +1015,10 @@ const IssueEntryManagement = () => {
                             Issue Number {!editingIssue && '(Auto-generated)'}
                           </label>
                           <div className="relative">
-                            <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">#</span>
                             {issueNoLoading ? (
                               <div className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center">
-                                <Loader2 className="w-4 h-4 animate-spin mr-2 text-gray-400" />
+                                <span className="w-4 h-4 animate-spin inline-block mr-2 text-gray-400">↻</span>
                                 <span className="text-gray-500">Generating issue number...</span>
                               </div>
                             ) : (
@@ -1080,7 +1047,7 @@ const IssueEntryManagement = () => {
                             Issue Date *
                           </label>
                           <div className="relative">
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">📅</span>
                             <input
                               type="date"
                               name="issueDate"
@@ -1114,7 +1081,7 @@ const IssueEntryManagement = () => {
                             Lot Number *
                           </label>
                           <div className="relative" ref={lotRef}>
-                            <Tag className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">🏷️</span>
                             <input
                               type="text"
                               value={lotSearch}
@@ -1133,7 +1100,7 @@ const IssueEntryManagement = () => {
                                 onClick={clearLotSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1142,7 +1109,7 @@ const IssueEntryManagement = () => {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {lotNumbersLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading lot numbers...
                                   </div>
                                 ) : filteredLotNumbers.length === 0 ? (
@@ -1168,7 +1135,7 @@ const IssueEntryManagement = () => {
                                           )}
                                         </div>
                                         {formData.lotNo === (lot.lotNo || lot) && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1212,7 +1179,7 @@ const IssueEntryManagement = () => {
                             From Mixing Group *
                           </label>
                           <div className="relative" ref={mixingGroupRef}>
-                            <Layers className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">📊</span>
                             <input
                               type="text"
                               value={mixingGroupSearch}
@@ -1231,7 +1198,7 @@ const IssueEntryManagement = () => {
                                 onClick={clearMixingGroupSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1240,7 +1207,7 @@ const IssueEntryManagement = () => {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {mixingGroupLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading mixing groups...
                                   </div>
                                 ) : filteredMixingGroups.length === 0 ? (
@@ -1264,7 +1231,7 @@ const IssueEntryManagement = () => {
                                           </div>
                                         </div>
                                         {formData.mixingGroupId === group.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1284,7 +1251,7 @@ const IssueEntryManagement = () => {
                             To Mixing Group *
                           </label>
                           <div className="relative" ref={mixingRef}>
-                            <ArrowRight className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10">→</span>
                             <input
                               type="text"
                               value={mixingSearch}
@@ -1303,7 +1270,7 @@ const IssueEntryManagement = () => {
                                 onClick={clearMixingSelection}
                                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                               >
-                                <XCircle className="w-4 h-4" />
+                                ✕
                               </button>
                             )}
                             
@@ -1312,7 +1279,7 @@ const IssueEntryManagement = () => {
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                 {mixingLoading ? (
                                   <div className="p-3 text-center text-gray-500">
-                                    <RefreshCw className="w-4 h-4 animate-spin mx-auto mb-2" />
+                                    <span className="w-4 h-4 animate-spin inline-block mr-2">↻</span>
                                     Loading mixings...
                                   </div>
                                 ) : filteredMixings.length === 0 ? (
@@ -1341,7 +1308,7 @@ const IssueEntryManagement = () => {
                                           )}
                                         </div>
                                         {formData.toMixingGroupId === mixing.id && (
-                                          <Check className="w-4 h-4 text-blue-600" />
+                                          <span className="w-4 h-4 text-blue-600">✓</span>
                                         )}
                                       </div>
                                     </div>
@@ -1390,7 +1357,7 @@ const IssueEntryManagement = () => {
                         <div className="text-sm text-gray-500">
                           {balesLoading ? (
                             <span className="flex items-center">
-                              <RefreshCw className="w-3 h-3 animate-spin mr-1" />
+                              <span className="w-3 h-3 animate-spin inline-block mr-1">↻</span>
                               Loading...
                             </span>
                           ) : formData.lotNo ? (
@@ -1404,7 +1371,7 @@ const IssueEntryManagement = () => {
                       {formData.lotNo ? (
                         balesLoading ? (
                           <div className="text-center py-8">
-                            <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-4" />
+                            <span className="text-4xl text-blue-600 animate-spin inline-block mb-4">↻</span>
                             <p className="text-gray-600">Loading available bales...</p>
                           </div>
                         ) : availableBales.length > 0 ? (
@@ -1444,9 +1411,9 @@ const IssueEntryManagement = () => {
                                       <td className="px-4 py-3 whitespace-nowrap">
                                         <div className="flex items-center">
                                           {isSelected ? (
-                                            <CheckSquare className="w-5 h-5 text-blue-600" />
+                                            <span className="w-5 h-5 text-blue-600">☑</span>
                                           ) : (
-                                            <Square className="w-5 h-5 text-gray-300" />
+                                            <span className="w-5 h-5 text-gray-300">□</span>
                                           )}
                                         </div>
                                       </td>
@@ -1470,7 +1437,7 @@ const IssueEntryManagement = () => {
                           </div>
                         ) : (
                           <div className="text-center py-8">
-                            <Package className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                            <span className="text-5xl text-gray-400 mb-4 inline-block">📦</span>
                             <p className="text-gray-600">No bales available for this lot</p>
                             <p className="text-sm text-gray-500 mt-1">
                               Make sure the lot number is correct
@@ -1479,7 +1446,7 @@ const IssueEntryManagement = () => {
                         )
                       ) : (
                         <div className="text-center py-8">
-                          <ClipboardCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <span className="text-5xl text-gray-400 mb-4 inline-block">📋</span>
                           <p className="text-gray-600">Select a lot number to view available bales</p>
                         </div>
                       )}
@@ -1535,7 +1502,7 @@ const IssueEntryManagement = () => {
                         </div>
                       ) : (
                         <div className="text-center py-8">
-                          <List className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                          <span className="text-5xl text-gray-400 mb-4 inline-block">📋</span>
                           <p className="text-gray-600">No bales selected for issue</p>
                           <p className="text-sm text-gray-500 mt-1">
                             Select bales from the available stock above
@@ -1585,7 +1552,7 @@ const IssueEntryManagement = () => {
                   onClick={() => setShowViewModal(false)}
                   className="text-gray-400 hover:text-gray-500"
                 >
-                  <X className="w-6 h-6" />
+                  ✕
                 </button>
               </div>
 
@@ -1595,16 +1562,16 @@ const IssueEntryManagement = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center">
-                      <Hash className="w-5 h-5 text-gray-400 mr-2" />
+                      <span className="text-gray-400 mr-2">#</span>
                       <h4 className="text-2xl font-bold text-gray-900">{viewingIssue.issueNumber || viewingIssue.issueNo}</h4>
                     </div>
                     <div className="flex items-center mt-2 space-x-4">
                       <div className="flex items-center">
-                        <Calendar className="w-4 h-4 text-gray-400 mr-1" />
+                        <span className="text-gray-400 mr-1">📅</span>
                         <span className="text-sm text-gray-600">Issue Date: {formatDate(viewingIssue.issueDate)}</span>
                       </div>
                       <div className="flex items-center">
-                        <Tag className="w-4 h-4 text-gray-400 mr-1" />
+                        <span className="text-gray-400 mr-1">🏷️</span>
                         <span className="text-sm text-gray-600">Lot: {viewingIssue.lotNo}</span>
                       </div>
                     </div>
