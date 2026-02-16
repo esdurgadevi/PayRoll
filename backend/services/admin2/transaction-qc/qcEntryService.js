@@ -43,3 +43,20 @@ export const deleteQCEntry = async (id) => {
   await entry.destroy(); // or soft-delete if you add deletedAt
   return true;
 };
+
+export const getAllQCEntries = async () => {
+  const entries = await QCEntry.findAll({
+    include: [{ model: db.InwardLot, as: "inwardLot", attributes: ["lotNo"] }],
+    order: [["createdAt", "DESC"]], // optional: order by latest entries
+  });
+
+  return entries;
+};
+
+export const getQCEntryById = async (id) => {
+  const entry = await QCEntry.findByPk(id, {
+    include: [{ model: db.InwardLot, as: "inwardLot", attributes: ["lotNo"] }],
+  });
+  if (!entry) throw new Error("QC entry not found");
+  return entry;
+};
