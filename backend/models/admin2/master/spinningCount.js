@@ -10,32 +10,32 @@ const SpinningCountModel = (sequelize) => {
         primaryKey: true,
       },
       countName: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.STRING(80),
         allowNull: false,
-        unique: true,
         trim: true,
-        field: "count_name",
       },
-      actCount: {
-        type: DataTypes.DECIMAL(6, 2),
+      ActCount: {
+        type: DataTypes.DECIMAL(6, 2),     // e.g. 40.00, 60.25
         allowNull: false,
-        field: "act_count",
       },
-      noilsPct: {
-        type: DataTypes.DECIMAL(6, 2),
+      Noils: {                             // Noils% stored as decimal
+        type: DataTypes.DECIMAL(5, 2),     // e.g. 12.50 = 12.5%
         allowNull: false,
-        field: "noils_pct",
-        validate: {
-          min: 0,
-          max: 100,
-        },
+        defaultValue: 0.00,
+      },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
       },
     },
     {
       tableName: "spinning_counts",
       timestamps: true,
       indexes: [
-        { unique: true, fields: ["count_name"] },
+        {
+          unique: true,
+          fields: ["countName"],
+        },
       ],
     }
   );

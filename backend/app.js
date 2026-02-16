@@ -28,6 +28,10 @@ import salesOrderRoutes from "./routes/admin1/transaction-waste/salesOrderRoutes
 import wastePackingRoutes from "./routes/admin1/transaction-waste/wastePackingRoutes.js"
 import invoiceRoutes from "./routes/admin1/transaction-waste/invoiceRoutes.js";
 import wasteEntryRoutes from "./routes/admin1/transaction-waste/wasteEntryRoutes.js";
+
+import spinningRoutes from "./routes/admin2/master/spinningCountRoutes.js";
+import simplexMachineRoutes from "./routes/admin2/master/simplexMachineRoutes.js";
+import qcEntryRoutes from "./routes/admin2/transaction-qc/qcEntryRoutes.js";
 const app = express();
 
 app.use(cors());
@@ -65,4 +69,10 @@ app.use("/api/waste-packings",wastePackingRoutes);
 app.use("/api/waste-sales",salesOrderRoutes);
 app.use("/api/invoices",invoiceRoutes);
 app.use("/api/waste-entries",wasteEntryRoutes);
+
+//admin2
+//master
+app.use("/api/admin2/master/spinning-counts",spinningRoutes);
+app.use("/api/admin2/master/simplex-machines", simplexMachineRoutes);
+app.use("/api/admin2/transaction-qc/qc-entries", qcEntryRoutes);
 export default app;

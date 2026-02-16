@@ -42,6 +42,11 @@ import WasteEntryDetailModel from './admin1/transaction-waste/waste-entry/wasteE
 
 import InvoiceModel from "./invoiceModel.js";
 import InvoiceDetailModel from "./invoiceDetailModel.js";
+
+//admin2 master
+import SpinningCountModel from "./admin2/master/spinningCount.js";
+import SimplexMachineModel from "./admin2/master/simplexMachine.js";
+import QCEntryModel from "./admin2/transaction-qc/QCEntryModel.js";
 const db = {};
 db.sequelize = sequelize;
 
@@ -78,6 +83,12 @@ db.Invoice = InvoiceModel(sequelize);
 db.InvoiceDetail = InvoiceDetailModel(sequelize);
 db.WasteEntry = WasteEntryModel(sequelize);
 db.WasteEntryDetail = WasteEntryDetailModel(sequelize);
+
+//admin2 master spinning count
+db.SpinningCount = SpinningCountModel(sequelize);
+db.SimplexMachine = SimplexMachineModel(sequelize);
+db.QCEntry = QCEntryModel(sequelize);
+
 db.State.hasMany(db.Station, {
   foreignKey: "stateId",
 });
@@ -330,5 +341,18 @@ db.WasteEntry.hasMany(db.WasteEntryDetail, {
 db.WasteEntryDetail.belongsTo(db.WasteEntry, {
   foreignKey: "wasteEntryId",
   as: "entry",
+});
+
+//admin2
+//transaction-qc entry
+db.InwardLot.hasMany(db.QCEntry, {
+  foreignKey: "inwardLotId",
+  as: "qcEntries",
+  onDelete: "RESTRICT",
+});
+
+db.QCEntry.belongsTo(db.InwardLot, {
+  foreignKey: "inwardLotId",
+  as: "inwardLot",
 });
 export default db;
