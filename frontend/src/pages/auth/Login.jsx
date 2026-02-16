@@ -48,8 +48,8 @@ const Login = () => {
         // Redirect based on role
         if (user.role === 'admin') {
           navigate('/admin/dashboard');
-        } else if (user.role === 'broker') {
-          navigate('/broker/dashboard');
+        } else if (user.role === 'admin1') {
+          navigate('/admin1/dashboard');
         } else if (user.role === 'customer') {
           navigate('/customer/dashboard');
         } else {

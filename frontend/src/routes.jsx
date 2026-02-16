@@ -38,6 +38,12 @@ import WasteCottonSalesPage from "./pages/admin/WasteCottonSalesPage.jsx";
 import WasteCottonInvoicePage from "./pages/admin/WasteCottonInvoicePage.jsx";
 import WasteEntryPage from "./pages/admin/WasteEntryPage.jsx";
 import Invoice from "./pages/admin/Invoice.jsx";
+
+//admin1
+import AdminLayout1 from "./layouts/AdminLayout1.jsx";
+import Spinning from "./pages/admin2/SpinningCount.jsx";
+import SimplexMachine from "./pages/admin2/SimplexMachine.jsx";
+import QCEntry from "./pages/admin2/QCEntry.jsx";
 // ================= PROTECTED ROUTE =================
 const ProtectedRoute = ({ children, role }) => {
   const userStr = localStorage.getItem("user");
@@ -99,11 +105,27 @@ const routes = [
       { path:"inward-entries", element:<InwardEntryManagement />},
       { path:"inward-lot",element:<InwardLot />},
       { path:"issue",element:<IssueManagement />},
+            
       { path:"waste1",element:<WastePackingPage />},
       {path:"sales-order",element:<WasteCottonSalesPage/> },
       {path:"waste-order",element:<WasteCottonInvoicePage />},
       {path:"waste-entry",element:<WasteEntryPage />},
       { path:"invoice",element:<Invoice />},
+    ],
+  },
+  {
+    path: "/admin1",
+    element: (
+      <ProtectedRoute role="admin1">
+        <AdminLayout1 />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <AdminDashboard /> },
+      { path: "dashboard", element: <AdminDashboard /> },
+      { path:"spinning",element:<Spinning />},
+      { path: "simplex",element:<SimplexMachine />},
+      { path: "qc-entry",element:<QCEntry />},
     ],
   },
 ];

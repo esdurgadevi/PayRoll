@@ -18,7 +18,7 @@ const Register = () => {
 
   const roles = [
     { value: 'admin', label: 'Administrator' },
-    { value: 'broker', label: 'Broker' },
+    { value: 'admin1', label: 'Administrator 2' },
     { value: 'customer', label: 'Customer' }
   ];
 
