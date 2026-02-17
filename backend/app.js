@@ -111,4 +111,11 @@ app.use(
   autoConerRoutes
 );
 
+import qcSimplexRoutes from "./routes/admin2/transaction-qc/qcSimplexRoutes.js";
+
+app.use(
+  "/api/admin2/transaction-qc/qc-simplex",
+  qcSimplexRoutes
+);
+
 export default app;
