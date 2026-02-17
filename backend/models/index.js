@@ -51,6 +51,8 @@ import SpinningLongFrameInit from "./admin2/transaction-qc/SpinningLongFrameMode
 import BreakerDrawingModel from "./admin2/transaction-qc/BreakerDrawingModel.js";
 import FinisherDrawingInit from "./admin2/transaction-qc/FinisherDrawingModel.js";
 import ComberEntryModel from "./admin2/transaction-qc/comberEntry.js";
+import LapFormerInit from "./admin2/transaction-qc/LapFormerModel.js";
+import AutoConerInit from "./admin2/transaction-qc/AutoConerModel.js";
 
 const db = {};
 db.sequelize = sequelize;
@@ -97,6 +99,8 @@ db.SpinningLongFrame = SpinningLongFrameInit(sequelize);
 db.BreakerDrawing = BreakerDrawingModel(sequelize);
 db.FinisherDrawing = FinisherDrawingInit(sequelize);
 db.ComberEntry = ComberEntryModel(sequelize);
+db.LapFormer = LapFormerInit(sequelize);
+db.AutoConer = AutoConerInit(sequelize);
 
 db.State.hasMany(db.Station, {
   foreignKey: "stateId",
@@ -415,5 +419,21 @@ db.SimplexMachine.hasMany(db.ComberEntry, {
   as: "comberEntries",
 });
 
+//transaction-qc lapformer
+db.LapFormer.belongsTo(db.SpinningCount, {
+  foreignKey: "countId",
+  as: "count",
+});
+
+//transaction-qc autoconerinit
+db.AutoConer.belongsTo(db.SpinningCount, {
+  foreignKey: "countId",
+  as: "count",
+});
+
+db.AutoConer.belongsTo(db.SimplexMachine, {
+  foreignKey: "simplexId",
+  as: "simplex",
+});
 
 export default db;

@@ -97,5 +97,18 @@ app.use(
   comberEntryRoutes
 );
 
+import lapFormerRoutes from "./routes/admin2/transaction-qc/lapFormerRoutes.js";
+
+app.use(
+  "/api/admin2/transaction-qc/lap-former",
+  lapFormerRoutes
+);
+
+import autoConerRoutes from "./routes/admin2/transaction-qc/autoConerRoutes.js";
+
+app.use(
+  "/api/admin2/transaction-qc/auto-coner",
+  autoConerRoutes
+);
 
 export default app;
