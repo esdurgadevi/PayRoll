@@ -118,4 +118,11 @@ app.use(
   qcSimplexRoutes
 );
 
+import qcCardingRoutes from "./routes/admin2/transaction-qc/qcCardingRoutes.js";
+
+app.use(
+  "/api/admin2/transaction-qc/qc-carding",
+  qcCardingRoutes
+);
+
 export default app;

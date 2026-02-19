@@ -54,6 +54,7 @@ import ComberEntryModel from "./admin2/transaction-qc/comberEntry.js";
 import LapFormerInit from "./admin2/transaction-qc/LapFormerModel.js";
 import AutoConerInit from "./admin2/transaction-qc/AutoConerModel.js";
 import QcSimplexInit from "./admin2/transaction-qc/QcSimplexModel.js";
+import QcCardingInit from "./admin2/transaction-qc/QcCardingModel.js";
 
 const db = {};
 db.sequelize = sequelize;
@@ -103,6 +104,7 @@ db.ComberEntry = ComberEntryModel(sequelize);
 db.LapFormer = LapFormerInit(sequelize);
 db.AutoConer = AutoConerInit(sequelize);
 db.QcSimplex = QcSimplexInit(sequelize);
+db.QcCarding = QcCardingInit(sequelize);
 
 db.State.hasMany(db.Station, {
   foreignKey: "stateId",
@@ -445,6 +447,17 @@ db.QcSimplex.belongsTo(db.SpinningCount, {
 });
 
 db.QcSimplex.belongsTo(db.SimplexMachine, {
+  foreignKey: "simplexId",
+  as: "simplex",
+});
+
+//transaction-qc carding
+db.QcCarding.belongsTo(db.SpinningCount, {
+  foreignKey: "countId",
+  as: "count",
+});
+
+db.QcCarding.belongsTo(db.SimplexMachine, {
   foreignKey: "simplexId",
   as: "simplex",
 });
