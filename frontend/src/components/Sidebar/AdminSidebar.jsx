@@ -43,7 +43,7 @@ const AdminSidebar = () => {
   ];
 
   const wasteTransactionItems = [
-    { to: "/admin/waste1", icon: "📦", label: "Waste1" },
+    { to: "/admin/waste1", icon: "📦", label: "Waste Packing" },
     { to: "/admin/sales-order", icon: "📦", label: "Waste Sales Order" },
     { to: "/admin/waste-order", icon: "📦", label: "Waste Cotton Invoice" },
     { to: "/admin/waste-entry", icon: "📦", label: "Waste Entry" },

@@ -13,7 +13,7 @@ const api = axios.create({
   },
 });
 
-// 🔐 Attach JWT token automatically
+// 🔐 Attach JWT automatically
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -27,50 +27,52 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ✅ Helper → format details safely
+const formatDetails = (details = []) =>
+  details.map((item) => ({
+    department: item.department?.trim() || null, // ✅ NEW FIELD
+    wasteMasterId: Number(item.wasteMasterId),
+    packingTypeId: Number(item.packingTypeId),
+    godownId: Number(item.godownId),
+    netWeight: Number(item.netWeight) || 0,
+  }));
+
 // ✅ Waste Entry Service
 const wasteEntryService = {
-  // --------------------------------------------------
+  //--------------------------------------------------
   // 🔹 Get all waste entries
-  // --------------------------------------------------
+  //--------------------------------------------------
   getAll: async () => {
-    const response = await api.get("/");
-    console.log(response);
-    return response.data.entries;
+    const { data } = await api.get("/");
+    return data.entries;
   },
 
-  // --------------------------------------------------
-  // 🔹 Get waste entry by ID
-  // --------------------------------------------------
+  //--------------------------------------------------
+  // 🔹 Get by ID
+  //--------------------------------------------------
   getById: async (id) => {
-    const response = await api.get(`/${id}`);
-    return response.data.entry;
+    const { data } = await api.get(`/${id}`);
+    return data.entry;
   },
 
+  //--------------------------------------------------
+  // 🔹 Create
+  //--------------------------------------------------
   create: async (data) => {
     const payload = {
       date: data.date,
       shift: data.shift?.trim() || "ALL",
       remarks: data.remarks?.trim() || null,
-
-      details: (data.details || []).map((item) => ({
-        // ✅ reference IDs instead of strings
-        department: item.department?.trim(),
-        wasteMasterId: Number(item.wasteMasterId),
-        packingTypeId: Number(item.packingTypeId),
-        godownId: Number(item.godownId),
-        netWeight: Number(item.netWeight) || 0,
-      })),
+      details: formatDetails(data.details),
     };
-    console.log(payload);
-    
-    const response = await api.post("/", payload);
-    console.log(response);
-    return response.data.entry;
+
+    const { data: res } = await api.post("/", payload);
+    return res.entry;
   },
 
-  // --------------------------------------------------
-  // 🔹 Update waste entry
-  // --------------------------------------------------
+  //--------------------------------------------------
+  // 🔹 Update
+  //--------------------------------------------------
   update: async (id, data) => {
     const payload = {
       date: data.date ?? undefined,
@@ -82,29 +84,22 @@ const wasteEntryService = {
         data.remarks !== undefined
           ? data.remarks?.trim()
           : undefined,
-
       details:
         data.details !== undefined
-          ? (data.details || []).map((item) => ({
-              department: item.department?.trim(),
-              wasteMasterId: Number(item.wasteMasterId),
-              packingTypeId: Number(item.packingTypeId),
-              godownId: Number(item.godownId),
-              netWeight: Number(item.netWeight) || 0,
-            }))
+          ? formatDetails(data.details)
           : undefined,
     };
 
-    const response = await api.put(`/${id}`, payload);
-    return response.data.entry;
+    const { data: res } = await api.put(`/${id}`, payload);
+    return res.entry;
   },
 
-  // --------------------------------------------------
-  // 🔹 Delete waste entry
-  // --------------------------------------------------
+  //--------------------------------------------------
+  // 🔹 Delete
+  //--------------------------------------------------
   delete: async (id) => {
-    const response = await api.delete(`/${id}`);
-    return response.data;
+    const { data } = await api.delete(`/${id}`);
+    return data;
   },
 };
 

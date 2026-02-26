@@ -50,7 +50,7 @@ const WasteCottonInvoicePage = () => {
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [invoiceToDelete, setInvoiceToDelete] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [bales, setBales] = useState([]);
+  const [availableBales, setAvailableBales] = useState([]); // Renamed from bales to availableBales for clarity
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -84,7 +84,7 @@ const WasteCottonInvoicePage = () => {
     igst: 0,
     approve: false,
     salesOrderId: "",
-    details: [],
+    details: [], // This will hold selected bales for the invoice
   });
 
   useEffect(() => {
@@ -127,6 +127,7 @@ const WasteCottonInvoicePage = () => {
       setLoadingOrders(true);
       const data = await salesOrderService.getAll();
       setSalesOrders(Array.isArray(data) ? data : []);
+      console.log(data);
     } catch (error) {
       console.error("Error fetching sales orders:", error);
     } finally {
@@ -173,7 +174,7 @@ const WasteCottonInvoicePage = () => {
     if (field === "grossWt" || field === "tareWt") {
       const gross = parseFloat(updatedDetails[index].grossWt) || 0;
       const tare = parseFloat(updatedDetails[index].tareWt) || 0;
-      updatedDetails[index].netWt = (gross + tare).toFixed(3);
+      updatedDetails[index].netWt = (gross - tare).toFixed(3); // Fixed: Net Wt = Gross - Tare, not Gross + Tare
     }
 
     setFormData((prev) => ({
@@ -185,11 +186,13 @@ const WasteCottonInvoicePage = () => {
   const handleOrderSelect = async (orderId) => {
     if (!orderId) {
       setSelectedOrder(null);
-      setBales([]);
+      setAvailableBales([]);
       setFormData((prev) => ({
         ...prev,
-        details: [],
+        details: [], // Clear selected bales
         salesOrderId: "",
+        partyName: "",
+        address: "",
       }));
       return;
     }
@@ -204,9 +207,11 @@ const WasteCottonInvoicePage = () => {
         partyName: order.party || "",
         address: order.despatchTo || "",
         salesOrderId: orderId,
+        // IMPORTANT: Keep details empty initially - don't auto-populate
+        details: [],
       }));
 
-      // Generate bales from order details
+      // Generate available bales from order details
       if (order.details && order.details.length > 0) {
         const generatedBales = [];
         order.details.forEach((detail, detailIndex) => {
@@ -222,15 +227,13 @@ const WasteCottonInvoicePage = () => {
               grossWt: avgWeight.toFixed(3),
               tareWt: 0,
               netWt: avgWeight.toFixed(3),
+              // Add a unique identifier to track bales
+              id: `${orderId}-${detailIndex}-${i}`,
             });
           }
         });
 
-        setBales(generatedBales);
-        setFormData((prev) => ({
-          ...prev,
-          details: generatedBales.slice(0, 10), // Limit to first 10 bales initially
-        }));
+        setAvailableBales(generatedBales);
       }
     } catch (error) {
       toast.error("Failed to load order details");
@@ -239,19 +242,44 @@ const WasteCottonInvoicePage = () => {
   };
 
   const addBaleToInvoice = (bale) => {
+    // Check if bale is already added to prevent duplicates
+    const isAlreadyAdded = formData.details.some(
+      (existingBale) => existingBale.baleNo === bale.baleNo
+    );
+
+    if (isAlreadyAdded) {
+      toast.warning("This bale is already added to the invoice");
+      return;
+    }
+
+    // Add the bale to invoice details
     setFormData((prev) => ({
       ...prev,
       details: [...prev.details, { ...bale }],
     }));
+
+    // Remove the bale from available bales
+    setAvailableBales((prev) => 
+      prev.filter((availableBale) => availableBale.baleNo !== bale.baleNo)
+    );
+
+    toast.success("Bale added to invoice");
   };
 
   const removeBaleFromInvoice = (index) => {
+    const removedBale = formData.details[index];
     const updatedDetails = [...formData.details];
     updatedDetails.splice(index, 1);
+    
     setFormData((prev) => ({
       ...prev,
       details: updatedDetails,
     }));
+
+    // Add the bale back to available bales
+    setAvailableBales((prev) => [...prev, removedBale]);
+
+    toast.info("Bale removed from invoice");
   };
 
   const calculateTotals = () => {
@@ -373,7 +401,7 @@ const WasteCottonInvoicePage = () => {
     });
     setSelectedInvoice(null);
     setSelectedOrder(null);
-    setBales([]);
+    setAvailableBales([]);
   };
 
   const handleView = (invoice) => {
@@ -417,6 +445,9 @@ const WasteCottonInvoicePage = () => {
       details: invoice.details || [],
     });
     setShowEditModal(true);
+    
+    // Note: For edit mode, we don't load available bales as they might have been already used
+    // This is a simplification - in a real app, you might need to track which bales are still available
   };
 
   const confirmDelete = (invoice) => {
@@ -640,7 +671,7 @@ const WasteCottonInvoicePage = () => {
 
             <form onSubmit={handleCreateSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Left Column - Order Selection and Bales */}
+                {/* Left Column - Order Selection and Available Bales */}
                 <div>
                   {/* Order Selection */}
                   <div className="mb-6">
@@ -657,7 +688,7 @@ const WasteCottonInvoicePage = () => {
                       >
                         <option value="">Select an order...</option>
                         {salesOrders.map((order) => (
-                          <option key={order._id} value={order._id}>
+                          <option key={order.id} value={order.id}>
                             {order.orderNo} - {order.party} ({order.details?.length || 0} items)
                           </option>
                         ))}
@@ -687,12 +718,12 @@ const WasteCottonInvoicePage = () => {
                     )}
 
                     {/* Available Bales from Order */}
-                    {bales.length > 0 && (
+                    {availableBales.length > 0 && (
                       <div className="mb-4">
                         <div className="flex justify-between items-center mb-2">
-                          <h5 className="font-medium text-gray-700">Available Bales ({bales.length})</h5>
+                          <h5 className="font-medium text-gray-700">Available Bales ({availableBales.length})</h5>
                           <span className="text-sm text-gray-500">
-                            Click "+" to add to invoice
+                            Click "Add" to include in invoice
                           </span>
                         </div>
                         <div className="overflow-y-auto max-h-60 border border-gray-200 rounded-lg">
@@ -706,7 +737,7 @@ const WasteCottonInvoicePage = () => {
                               </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
-                              {bales.map((bale, index) => (
+                              {availableBales.map((bale, index) => (
                                 <tr key={index} className="hover:bg-gray-50">
                                   <td className="px-3 py-2 text-sm text-gray-500">{bale.baleNo}</td>
                                   <td className="px-3 py-2 text-sm text-gray-500">{bale.wasteName}</td>
@@ -715,7 +746,7 @@ const WasteCottonInvoicePage = () => {
                                     <button
                                       type="button"
                                       onClick={() => addBaleToInvoice(bale)}
-                                      className="text-green-600 hover:text-green-800 text-sm"
+                                      className="text-green-600 hover:text-green-800 text-sm font-medium"
                                     >
                                       Add
                                     </button>
@@ -725,6 +756,12 @@ const WasteCottonInvoicePage = () => {
                             </tbody>
                           </table>
                         </div>
+                      </div>
+                    )}
+
+                    {selectedOrder && availableBales.length === 0 && (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg">
+                        <p className="text-gray-500">No bales available from this order</p>
                       </div>
                     )}
                   </div>
@@ -907,7 +944,7 @@ const WasteCottonInvoicePage = () => {
                               <button
                                 type="button"
                                 onClick={() => removeBaleFromInvoice(index)}
-                                className="text-red-600 hover:text-red-900 text-sm"
+                                className="text-red-600 hover:text-red-900 text-sm font-medium"
                               >
                                 Remove
                               </button>

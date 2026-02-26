@@ -693,7 +693,7 @@ const WastePackingPage = () => {
                               </svg>
                             </button>
                             <button
-                              onClick={() => confirmDelete(packing._id, packing.wasteType, packing.lotNo)}
+                              onClick={() => confirmDelete(packing.id, packing.wasteType, packing.lotNo)}
                               className="text-red-600 hover:text-red-900"
                               title="Delete"
                             >

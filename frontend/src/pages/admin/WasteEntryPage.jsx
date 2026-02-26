@@ -9,20 +9,20 @@ const WasteEntryPage = () => {
   // State Management
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [modalLoading, setModalLoading] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const [openViewModal, setOpenViewModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [viewEntry, setViewEntry] = useState(null);
   const [notification, setNotification] = useState({ show: false, message: '', type: '' });
 
   // Master Data States
   const [wasteMasters, setWasteMasters] = useState([]);
   const [godowns, setGodowns] = useState([]);
   const [packingTypes, setPackingTypes] = useState([]);
-  const [wasteMastersLoading, setWasteMastersLoading] = useState(false);
-  const [godownsLoading, setGodownsLoading] = useState(false);
-  const [packingTypesLoading, setPackingTypesLoading] = useState(false);
   
-  // Predefined departments list (from your image)
+  // Predefined departments list
   const departments = [
     'Carding',
     'Comber',
@@ -33,29 +33,27 @@ const WasteEntryPage = () => {
     'Ring Frame'
   ];
 
-  // Dropdown states for each field type
+  // UI States
   const [showWasteDropdown, setShowWasteDropdown] = useState({});
   const [showPackingDropdown, setShowPackingDropdown] = useState({});
   const [showGodownDropdown, setShowGodownDropdown] = useState({});
   const [showDepartmentDropdown, setShowDepartmentDropdown] = useState({});
   
-  // Search states for each dropdown
+  // Search states
   const [wasteSearch, setWasteSearch] = useState({});
   const [packingSearch, setPackingSearch] = useState({});
   const [godownSearch, setGodownSearch] = useState({});
   const [departmentSearch, setDepartmentSearch] = useState({});
   
   // Error states
-  const [wasteErrors, setWasteErrors] = useState({});
-  const [packingErrors, setPackingErrors] = useState({});
-  const [godownErrors, setGodownErrors] = useState({});
-  const [departmentErrors, setDepartmentErrors] = useState({});
+  const [errors, setErrors] = useState({});
   
-  // Refs for closing dropdowns
+  // Refs
   const wasteRefs = useRef({});
   const packingRefs = useRef({});
   const godownRefs = useRef({});
   const departmentRefs = useRef({});
+  const modalRef = useRef(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -75,47 +73,26 @@ const WasteEntryPage = () => {
 
   const shifts = ['ALL', 'A', 'B', 'C'];
 
-  // Fetch all master data on component mount
+  // Fetch master data
   useEffect(() => {
     fetchMasterData();
   }, []);
 
-  // Fetch all waste entries
+  // Fetch entries
   useEffect(() => {
     fetchEntries();
   }, []);
 
-  // Set up click outside listeners for all dropdowns
+  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // Check department dropdowns
-      Object.keys(departmentRefs.current).forEach((key) => {
-        if (departmentRefs.current[key] && !departmentRefs.current[key].contains(event.target)) {
-          setShowDepartmentDropdown(prev => ({ ...prev, [key]: false }));
-          validateDepartmentSelection(parseInt(key));
-        }
-      });
-      
-      // Check waste dropdowns
-      Object.keys(wasteRefs.current).forEach((key) => {
-        if (wasteRefs.current[key] && !wasteRefs.current[key].contains(event.target)) {
-          setShowWasteDropdown(prev => ({ ...prev, [key]: false }));
-        }
-      });
-      
-      // Check packing dropdowns
-      Object.keys(packingRefs.current).forEach((key) => {
-        if (packingRefs.current[key] && !packingRefs.current[key].contains(event.target)) {
-          setShowPackingDropdown(prev => ({ ...prev, [key]: false }));
-        }
-      });
-      
-      // Check godown dropdowns
-      Object.keys(godownRefs.current).forEach((key) => {
-        if (godownRefs.current[key] && !godownRefs.current[key].contains(event.target)) {
-          setShowGodownDropdown(prev => ({ ...prev, [key]: false }));
-        }
-      });
+      // Close all dropdowns when clicking outside
+      if (!event.target.closest('.dropdown-container')) {
+        setShowDepartmentDropdown({});
+        setShowWasteDropdown({});
+        setShowPackingDropdown({});
+        setShowGodownDropdown({});
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -124,17 +101,11 @@ const WasteEntryPage = () => {
 
   const fetchMasterData = async () => {
     try {
-      setWasteMastersLoading(true);
-      setGodownsLoading(true);
-      setPackingTypesLoading(true);
-      
       const [wasteData, godownData, packingData] = await Promise.all([
         wasteMasterService.getAll(),
         godownService.getAll(),
         packingTypeService.getAll()
       ]);
-      
-      console.log("Waste Masters:", wasteData);
       
       setWasteMasters(Array.isArray(wasteData) ? wasteData : []);
       setGodowns(Array.isArray(godownData) ? godownData : []);
@@ -142,10 +113,6 @@ const WasteEntryPage = () => {
     } catch (error) {
       console.error('Error fetching master data:', error);
       showNotification('Failed to load master data', 'error');
-    } finally {
-      setWasteMastersLoading(false);
-      setGodownsLoading(false);
-      setPackingTypesLoading(false);
     }
   };
 
@@ -153,8 +120,7 @@ const WasteEntryPage = () => {
     try {
       setLoading(true);
       const data = await wasteEntryService.getAll();
-      console.log("Fetched entries:", data);
-      setEntries(data || []);
+      setEntries(Array.isArray(data) ? data : []);
     } catch (error) {
       showNotification('Failed to fetch waste entries', 'error');
     } finally {
@@ -162,7 +128,6 @@ const WasteEntryPage = () => {
     }
   };
 
-  // Show notification
   const showNotification = (message, type = 'success') => {
     setNotification({ show: true, message, type });
     setTimeout(() => {
@@ -170,71 +135,61 @@ const WasteEntryPage = () => {
     }, 3000);
   };
 
-  // Get display values from master data
-  const getWasteMasterName = (id) => {
-    if (!id) return '';
-    const waste = wasteMasters.find(w => w._id === id || w.id === id);
-    return waste ? waste.waste || waste.name : '';
+  // Helper functions to get display names using id instead of _id
+  const getWasteMasterName = (wasteMaster) => {
+    if (!wasteMaster) return '-';
+    if (typeof wasteMaster === 'object') {
+      return wasteMaster.waste || wasteMaster.name || '-';
+    }
+    const found = wasteMasters.find(w => w.id === wasteMaster || w._id === wasteMaster);
+    return found ? (found.waste || found.name) : '-';
   };
 
-  const getPackingTypeName = (id) => {
-    if (!id) return '';
-    const packing = packingTypes.find(p => p._id === id || p.id === id);
-    return packing ? packing.name : '';
+  const getPackingTypeName = (packingType) => {
+    if (!packingType) return '-';
+    if (typeof packingType === 'object') {
+      return packingType.name || '-';
+    }
+    const found = packingTypes.find(p => p.id === packingType || p._id === packingType);
+    return found ? found.name : '-';
   };
 
-  const getGodownName = (id) => {
-    if (!id) return '';
-    const godown = godowns.find(g => g._id === id || g.id === id);
-    return godown ? godown.godownName : '';
+  const getGodownName = (godown) => {
+    if (!godown) return '-';
+    if (typeof godown === 'object') {
+      return godown.godownName || godown.name || '-';
+    }
+    const found = godowns.find(g => g.id === godown || g._id === godown);
+    return found ? (found.godownName || found.name) : '-';
   };
 
   // Filter functions
-  const getFilteredDepartments = (index) => {
-    const searchTerm = departmentSearch[index] || '';
-    if (!searchTerm.trim()) return departments;
+  const getFilteredDepartments = (searchTerm) => {
+    if (!searchTerm) return departments;
     return departments.filter(dept => 
       dept.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
-  const getFilteredWasteMasters = (index) => {
-    const searchTerm = wasteSearch[index] || '';
-    if (!searchTerm.trim()) return wasteMasters;
+  const getFilteredWasteMasters = (searchTerm) => {
+    if (!searchTerm) return wasteMasters;
     return wasteMasters.filter(waste => 
-      (waste.waste || waste.name)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      waste.department?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      waste.code?.toString().includes(searchTerm)
+      (waste.waste || waste.name)?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
-  const getFilteredPackingTypes = (index) => {
-    const searchTerm = packingSearch[index] || '';
-    if (!searchTerm.trim()) return packingTypes;
+  const getFilteredPackingTypes = (searchTerm) => {
+    if (!searchTerm) return packingTypes;
     return packingTypes.filter(packing => 
-      packing.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      packing.code?.toString().includes(searchTerm)
+      packing.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
-  const getFilteredGodowns = (index) => {
-    const searchTerm = godownSearch[index] || '';
-    if (!searchTerm.trim()) return godowns;
+  const getFilteredGodowns = (searchTerm) => {
+    if (!searchTerm) return godowns;
     return godowns.filter(godown => 
-      godown.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      godown.code?.toString().includes(searchTerm) ||
-      godown.location?.toLowerCase().includes(searchTerm.toLowerCase())
+      (godown.godownName || godown.name)?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  };
-
-  // Validation functions
-  const validateDepartmentSelection = (index) => {
-    const department = formData.details[index]?.department;
-    if (!department) {
-      setDepartmentErrors(prev => ({ ...prev, [index]: 'Department is required' }));
-    } else {
-      setDepartmentErrors(prev => ({ ...prev, [index]: '' }));
-    }
   };
 
   // Reset form
@@ -253,80 +208,93 @@ const WasteEntryPage = () => {
         }
       ]
     });
-    setShowDepartmentDropdown({});
-    setShowWasteDropdown({});
-    setShowPackingDropdown({});
-    setShowGodownDropdown({});
     setDepartmentSearch({});
     setWasteSearch({});
     setPackingSearch({});
     setGodownSearch({});
-    setDepartmentErrors({});
-    setWasteErrors({});
-    setPackingErrors({});
-    setGodownErrors({});
+    setErrors({});
     setSelectedEntry(null);
     setIsEditing(false);
   };
 
-  // Open modal for creating new entry
+  // Open create modal
   const handleOpenCreateModal = () => {
     resetForm();
     setOpenModal(true);
   };
 
-  // Open modal for editing entry
+  // Open view modal
+  const handleOpenViewModal = async (entry) => {
+    try {
+      setModalLoading(true);
+      const fullEntry = await wasteEntryService.getById(entry.id || entry._id);
+      setViewEntry(fullEntry);
+      setOpenViewModal(true);
+    } catch (error) {
+      showNotification('Failed to load entry details', 'error');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  // Open edit modal
   const handleOpenEditModal = async (entry) => {
     try {
-      const fullEntry = await wasteEntryService.getById(entry._id);
-      console.log("Full entry for edit:", fullEntry);
+      setModalLoading(true);
+      const fullEntry = await wasteEntryService.getById(entry.id || entry._id);
       
-      // Initialize search values for each detail
-      const departmentSearchValues = {};
-      const wasteSearchValues = {};
-      const packingSearchValues = {};
-      const godownSearchValues = {};
-      
-      fullEntry.details.forEach((detail, index) => {
-        departmentSearchValues[index] = detail.department || '';
-        wasteSearchValues[index] = getWasteMasterName(detail.wasteMaster?._id || detail.wasteMasterId);
-        packingSearchValues[index] = getPackingTypeName(detail.packingType?._id || detail.packingTypeId);
-        godownSearchValues[index] = getGodownName(detail.godown?._id || detail.godownId);
-      });
-      
+      // Format the data for editing
+      const formattedDetails = fullEntry.details.map(detail => ({
+        department: detail.department || '',
+        wasteMasterId: detail.wasteMaster?.id || detail.wasteMasterId || '',
+        packingTypeId: detail.packingType?.id || detail.packingTypeId || '',
+        godownId: detail.godown?.id || detail.godownId || '',
+        netWeight: detail.netWeight || ''
+      }));
+
       setFormData({
         date: fullEntry.date.split('T')[0],
         shift: fullEntry.shift,
         remarks: fullEntry.remarks || '',
-        details: fullEntry.details.map(detail => ({
-          department: detail.department || '',
-          wasteMasterId: detail.wasteMaster?._id || detail.wasteMasterId,
-          packingTypeId: detail.packingType?._id || detail.packingTypeId,
-          godownId: detail.godown?._id || detail.godownId,
-          netWeight: detail.netWeight
-        }))
+        details: formattedDetails
       });
-      
-      setDepartmentSearch(departmentSearchValues);
-      setWasteSearch(wasteSearchValues);
-      setPackingSearch(packingSearchValues);
-      setGodownSearch(godownSearchValues);
-      
+
+      // Set search values for each row
+      formattedDetails.forEach((detail, index) => {
+        setDepartmentSearch(prev => ({ ...prev, [index]: detail.department }));
+        
+        const waste = wasteMasters.find(w => w.id === detail.wasteMasterId || w._id === detail.wasteMasterId);
+        setWasteSearch(prev => ({ ...prev, [index]: waste ? (waste.waste || waste.name) : '' }));
+        
+        const packing = packingTypes.find(p => p.id === detail.packingTypeId || p._id === detail.packingTypeId);
+        setPackingSearch(prev => ({ ...prev, [index]: packing ? packing.name : '' }));
+        
+        const godown = godowns.find(g => g.id === detail.godownId || g._id === detail.godownId);
+        setGodownSearch(prev => ({ ...prev, [index]: godown ? (godown.godownName || godown.name) : '' }));
+      });
+
       setSelectedEntry(fullEntry);
       setIsEditing(true);
       setOpenModal(true);
     } catch (error) {
       showNotification('Failed to load entry details', 'error');
+    } finally {
+      setModalLoading(false);
     }
   };
 
-  // Close modal
+  // Close modals
   const handleCloseModal = () => {
     setOpenModal(false);
     resetForm();
   };
 
-  // Handle main form input changes
+  const handleCloseViewModal = () => {
+    setOpenViewModal(false);
+    setViewEntry(null);
+  };
+
+  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -335,14 +303,13 @@ const WasteEntryPage = () => {
     }));
   };
 
-  // Handle detail row changes
+  // Handle detail changes
   const handleDetailChange = (index, field, value) => {
     const updatedDetails = [...formData.details];
-    updatedDetails[index][field] = value;
-    
-    if (field === 'netWeight') {
-      updatedDetails[index][field] = value === '' ? '' : Number(value);
-    }
+    updatedDetails[index] = {
+      ...updatedDetails[index],
+      [field]: value
+    };
     
     setFormData(prev => ({
       ...prev,
@@ -350,100 +317,80 @@ const WasteEntryPage = () => {
     }));
 
     // Clear error for this field
-    if (field === 'department') {
-      setDepartmentErrors(prev => ({ ...prev, [index]: '' }));
+    if (errors[`${index}_${field}`]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`${index}_${field}`];
+        return newErrors;
+      });
     }
   };
 
-  // Handle department selection
+  // Department handlers
   const handleDepartmentSelect = (index, department) => {
     handleDetailChange(index, 'department', department);
     setDepartmentSearch(prev => ({ ...prev, [index]: department }));
     setShowDepartmentDropdown(prev => ({ ...prev, [index]: false }));
-    setDepartmentErrors(prev => ({ ...prev, [index]: '' }));
   };
 
-  // Handle waste master selection
-  const handleWasteSelect = (index, waste) => {
-    const wasteId = waste._id || waste.id;
-    handleDetailChange(index, 'wasteMasterId', wasteId);
-    setWasteSearch(prev => ({ ...prev, [index]: waste.waste || waste.name }));
-    setShowWasteDropdown(prev => ({ ...prev, [index]: false }));
-    setWasteErrors(prev => ({ ...prev, [index]: '' }));
-  };
-
-  // Handle packing type selection
-  const handlePackingSelect = (index, packing) => {
-    const packingId = packing._id || packing.id;
-    handleDetailChange(index, 'packingTypeId', packingId);
-    setPackingSearch(prev => ({ ...prev, [index]: packing.name }));
-    setShowPackingDropdown(prev => ({ ...prev, [index]: false }));
-    setPackingErrors(prev => ({ ...prev, [index]: '' }));
-  };
-
-  // Handle godown selection
-  const handleGodownSelect = (index, godown) => {
-    const godownId = godown._id || godown.id;
-    handleDetailChange(index, 'godownId', godownId);
-    setGodownSearch(prev => ({ ...prev, [index]: godown.name }));
-    setShowGodownDropdown(prev => ({ ...prev, [index]: false }));
-    setGodownErrors(prev => ({ ...prev, [index]: '' }));
-  };
-
-  // Handle department search change
-  const handleDepartmentSearchChange = (index, e) => {
-    const value = e.target.value;
+  const handleDepartmentSearchChange = (index, value) => {
     setDepartmentSearch(prev => ({ ...prev, [index]: value }));
     setShowDepartmentDropdown(prev => ({ ...prev, [index]: true }));
-    
-    // Clear selection if search changes
     if (formData.details[index]?.department !== value) {
       handleDetailChange(index, 'department', '');
     }
   };
 
-  // Handle waste search change
-  const handleWasteSearchChange = (index, e) => {
-    const value = e.target.value;
+  // Waste handlers (using id)
+  const handleWasteSelect = (index, waste) => {
+    const wasteId = waste.id || waste._id;
+    handleDetailChange(index, 'wasteMasterId', wasteId);
+    setWasteSearch(prev => ({ ...prev, [index]: waste.waste || waste.name }));
+    setShowWasteDropdown(prev => ({ ...prev, [index]: false }));
+  };
+
+  const handleWasteSearchChange = (index, value) => {
     setWasteSearch(prev => ({ ...prev, [index]: value }));
     setShowWasteDropdown(prev => ({ ...prev, [index]: true }));
-    
-    // Clear selection if search changes
     if (formData.details[index]?.wasteMasterId) {
       handleDetailChange(index, 'wasteMasterId', '');
     }
   };
 
-  // Handle packing search change
-  const handlePackingSearchChange = (index, e) => {
-    const value = e.target.value;
+  // Packing handlers (using id)
+  const handlePackingSelect = (index, packing) => {
+    const packingId = packing.id || packing._id;
+    handleDetailChange(index, 'packingTypeId', packingId);
+    setPackingSearch(prev => ({ ...prev, [index]: packing.name }));
+    setShowPackingDropdown(prev => ({ ...prev, [index]: false }));
+  };
+
+  const handlePackingSearchChange = (index, value) => {
     setPackingSearch(prev => ({ ...prev, [index]: value }));
     setShowPackingDropdown(prev => ({ ...prev, [index]: true }));
-    
     if (formData.details[index]?.packingTypeId) {
       handleDetailChange(index, 'packingTypeId', '');
     }
   };
 
-  // Handle godown search change
-  const handleGodownSearchChange = (index, e) => {
-    const value = e.target.value;
+  // Godown handlers (using id)
+  const handleGodownSelect = (index, godown) => {
+    const godownId = godown.id || godown._id;
+    handleDetailChange(index, 'godownId', godownId);
+    setGodownSearch(prev => ({ ...prev, [index]: godown.godownName || godown.name }));
+    setShowGodownDropdown(prev => ({ ...prev, [index]: false }));
+  };
+
+  const handleGodownSearchChange = (index, value) => {
     setGodownSearch(prev => ({ ...prev, [index]: value }));
     setShowGodownDropdown(prev => ({ ...prev, [index]: true }));
-    
     if (formData.details[index]?.godownId) {
       handleDetailChange(index, 'godownId', '');
     }
   };
 
-  // Handle blur events
-  const handleDepartmentBlur = (index) => {
-    setTimeout(() => validateDepartmentSelection(index), 200);
-  };
-
-  // Add new detail row
+  // Add/Remove rows
   const addDetailRow = () => {
-    const newIndex = formData.details.length;
     setFormData(prev => ({
       ...prev,
       details: [
@@ -459,7 +406,6 @@ const WasteEntryPage = () => {
     }));
   };
 
-  // Remove detail row
   const removeDetailRow = (index) => {
     if (formData.details.length > 1) {
       const updatedDetails = formData.details.filter((_, i) => i !== index);
@@ -468,40 +414,21 @@ const WasteEntryPage = () => {
         details: updatedDetails
       }));
       
-      // Clean up states for removed row
-      const newDepartmentState = {};
-      const newWasteState = {};
-      const newPackingState = {};
-      const newGodownState = {};
-      
-      Object.keys(departmentSearch).forEach(key => {
-        const numKey = parseInt(key);
-        if (numKey < index) newDepartmentState[key] = departmentSearch[key];
-        else if (numKey > index) newDepartmentState[(numKey - 1).toString()] = departmentSearch[key];
-      });
-      
-      Object.keys(wasteSearch).forEach(key => {
-        const numKey = parseInt(key);
-        if (numKey < index) newWasteState[key] = wasteSearch[key];
-        else if (numKey > index) newWasteState[(numKey - 1).toString()] = wasteSearch[key];
-      });
-      
-      Object.keys(packingSearch).forEach(key => {
-        const numKey = parseInt(key);
-        if (numKey < index) newPackingState[key] = packingSearch[key];
-        else if (numKey > index) newPackingState[(numKey - 1).toString()] = packingSearch[key];
-      });
-      
-      Object.keys(godownSearch).forEach(key => {
-        const numKey = parseInt(key);
-        if (numKey < index) newGodownState[key] = godownSearch[key];
-        else if (numKey > index) newGodownState[(numKey - 1).toString()] = godownSearch[key];
-      });
-      
-      setDepartmentSearch(newDepartmentState);
-      setWasteSearch(newWasteState);
-      setPackingSearch(newPackingState);
-      setGodownSearch(newGodownState);
+      // Clean up related states
+      const cleanupState = (state) => {
+        const newState = {};
+        Object.keys(state).forEach(key => {
+          const numKey = parseInt(key);
+          if (numKey < index) newState[key] = state[key];
+          else if (numKey > index) newState[(numKey - 1).toString()] = state[key];
+        });
+        return newState;
+      };
+
+      setDepartmentSearch(cleanupState(departmentSearch));
+      setWasteSearch(cleanupState(wasteSearch));
+      setPackingSearch(cleanupState(packingSearch));
+      setGodownSearch(cleanupState(godownSearch));
     }
   };
 
@@ -514,71 +441,74 @@ const WasteEntryPage = () => {
 
   // Validate form
   const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+
     if (!formData.date) {
       showNotification('Date is required', 'error');
       return false;
     }
 
-    for (let i = 0; i < formData.details.length; i++) {
-      const detail = formData.details[i];
-      
+    formData.details.forEach((detail, index) => {
       if (!detail.department) {
-        showNotification(`Department is required for row ${i + 1}`, 'error');
-        return false;
+        newErrors[`${index}_department`] = 'Department is required';
+        isValid = false;
       }
       if (!detail.wasteMasterId) {
-        showNotification(`Waste Type is required for row ${i + 1}`, 'error');
-        return false;
+        newErrors[`${index}_waste`] = 'Waste type is required';
+        isValid = false;
       }
       if (!detail.packingTypeId) {
-        showNotification(`Packing Type is required for row ${i + 1}`, 'error');
-        return false;
+        newErrors[`${index}_packing`] = 'Packing type is required';
+        isValid = false;
       }
       if (!detail.godownId) {
-        showNotification(`Godown is required for row ${i + 1}`, 'error');
-        return false;
+        newErrors[`${index}_godown`] = 'Godown is required';
+        isValid = false;
       }
       if (!detail.netWeight || detail.netWeight <= 0) {
-        showNotification(`Valid Net Weight is required for row ${i + 1}`, 'error');
-        return false;
+        newErrors[`${index}_weight`] = 'Valid weight is required';
+        isValid = false;
       }
-    }
+    });
 
-    return true;
+    setErrors(newErrors);
+    return isValid;
   };
 
-  // Submit form
+  // Submit form (using id for update)
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
     try {
-      setLoading(true);
+      setModalLoading(true);
       
-      if (isEditing && selectedEntry?._id) {
-        await wasteEntryService.update(selectedEntry._id, formData);
+      if (isEditing && selectedEntry) {
+        await wasteEntryService.update(selectedEntry.id || selectedEntry._id, formData);
         showNotification('Waste entry updated successfully');
       } else {
         await wasteEntryService.create(formData);
         showNotification('Waste entry created successfully');
       }
       
-      fetchEntries();
+      await fetchEntries();
       handleCloseModal();
     } catch (error) {
       showNotification(error.response?.data?.message || 'Operation failed', 'error');
     } finally {
-      setLoading(false);
+      setModalLoading(false);
     }
   };
 
-  // Delete entry
-  const handleDelete = async (id) => {
+  // Delete entry (using id)
+  const handleDelete = async (entry) => {
+    const id = entry.id || entry._id;
     if (window.confirm('Are you sure you want to delete this entry?')) {
       try {
         setLoading(true);
         await wasteEntryService.delete(id);
         showNotification('Waste entry deleted successfully');
-        fetchEntries();
+        await fetchEntries();
       } catch (error) {
         showNotification('Failed to delete entry', 'error');
       } finally {
@@ -597,31 +527,18 @@ const WasteEntryPage = () => {
     }).replace(/ /g, '-');
   };
 
-  // Calculate statistics
-  const todayEntries = entries.filter(e => 
-    new Date(e.date).toDateString() === new Date().toDateString()
-  ).length;
-
-  const totalWeightToday = todayEntries > 0 ? 
-    entries.filter(e => new Date(e.date).toDateString() === new Date().toDateString())
-      .reduce((sum, entry) => sum + entry.details.reduce((s, d) => s + (d.netWeight || 0), 0), 0) : 0;
-
-  // Format code
-  const formatCode = (code) => {
-    if (!code && code !== 0) return 'N/A';
-    return code.toString().padStart(4, '0');
-  };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-6">
       {/* Notification */}
       {notification.show && (
-        <div className={`fixed top-4 right-4 z-50 animate-slide-in ${notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-green-50 border-green-200 text-green-600'} border px-4 py-3 rounded-lg shadow-lg max-w-md`}>
-          <div className="flex items-center">
+        <div className={`fixed top-4 right-4 z-50 animate-slide-in ${
+          notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-600' : 'bg-green-50 border-green-200 text-green-600'
+        } border px-4 py-3 rounded-lg shadow-lg max-w-md`}>
+          <div className="flex items-center justify-between">
             <span className="font-medium">{notification.message}</span>
             <button 
               onClick={() => setNotification({ show: false, message: '', type: '' })}
-              className="ml-auto text-xl"
+              className="ml-4 text-xl hover:text-gray-700"
             >
               ×
             </button>
@@ -640,7 +557,7 @@ const WasteEntryPage = () => {
             onClick={handleOpenCreateModal}
             className="mt-4 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center transition duration-200"
           >
-            <span className="mr-2">+</span>
+            <span className="mr-2 text-xl">+</span>
             New Waste Entry
           </button>
         </div>
@@ -667,7 +584,9 @@ const WasteEntryPage = () => {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Today's Entries</p>
-              <p className="text-2xl font-bold text-gray-800">{todayEntries}</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {entries.filter(e => new Date(e.date).toDateString() === new Date().toDateString()).length}
+              </p>
             </div>
           </div>
         </div>
@@ -678,8 +597,12 @@ const WasteEntryPage = () => {
               <span className="text-xl">⚖️</span>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Today's Total Weight</p>
-              <p className="text-2xl font-bold text-gray-800">{totalWeightToday.toLocaleString()} kg</p>
+              <p className="text-sm font-medium text-gray-600">Total Weight</p>
+              <p className="text-2xl font-bold text-gray-800">
+                {entries.reduce((sum, entry) => 
+                  sum + (entry.details?.reduce((s, d) => s + (d.netWeight || 0), 0) || 0), 0
+                ).toLocaleString()} kg
+              </p>
             </div>
           </div>
         </div>
@@ -699,15 +622,15 @@ const WasteEntryPage = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Shift</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waste Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Packing Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net Weight</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Packing</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight (kg)</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Godown</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Remarks</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {loading && entries.length === 0 ? (
+              {loading ? (
                 <tr>
                   <td colSpan="9" className="px-6 py-8 text-center">
                     <div className="flex justify-center">
@@ -723,9 +646,9 @@ const WasteEntryPage = () => {
                 </tr>
               ) : (
                 entries.map((entry) => (
-                  <React.Fragment key={entry._id}>
-                    {entry.details.map((detail, detailIndex) => (
-                      <tr key={`${entry._id}-${detailIndex}`} className="hover:bg-gray-50 transition duration-150">
+                  <React.Fragment key={entry.id || entry._id}>
+                    {entry.details?.map((detail, detailIndex) => (
+                      <tr key={`${entry.id || entry._id}-${detailIndex}`} className="hover:bg-gray-50">
                         {detailIndex === 0 && (
                           <>
                             <td className="px-6 py-4 whitespace-nowrap" rowSpan={entry.details.length}>
@@ -744,22 +667,16 @@ const WasteEntryPage = () => {
                           <div className="text-sm text-gray-900">{detail.department || '-'}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {getWasteMasterName(detail.wasteMaster?._id || detail.wasteMasterId) || '-'}
-                          </div>
+                          <div className="text-sm text-gray-900">{getWasteMasterName(detail.wasteMaster || detail.wasteMasterId)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {getPackingTypeName(detail.packingType?._id || detail.packingTypeId) || '-'}
-                          </div>
+                          <div className="text-sm text-gray-900">{getPackingTypeName(detail.packingType || detail.packingTypeId)}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-gray-900">{detail.netWeight?.toLocaleString()} kg</div>
+                          <div className="text-sm font-semibold text-gray-900">{detail.netWeight?.toLocaleString()}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">
-                            {getGodownName(detail.godown?._id || detail.godownId) || '-'}
-                          </div>
+                          <div className="text-sm text-gray-900">{getGodownName(detail.godown || detail.godownId)}</div>
                         </td>
                         {detailIndex === 0 && (
                           <td className="px-6 py-4" rowSpan={entry.details.length}>
@@ -772,16 +689,20 @@ const WasteEntryPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" rowSpan={entry.details.length}>
                             <div className="flex space-x-3">
                               <button
+                                onClick={() => handleOpenViewModal(entry)}
+                                className="text-green-600 hover:text-green-800 hover:underline"
+                              >
+                                View
+                              </button>
+                              <button
                                 onClick={() => handleOpenEditModal(entry)}
-                                className="text-blue-600 hover:text-blue-800"
-                                title="Edit"
+                                className="text-blue-600 hover:text-blue-800 hover:underline"
                               >
                                 Edit
                               </button>
                               <button
-                                onClick={() => handleDelete(entry._id)}
-                                className="text-red-600 hover:text-red-800"
-                                title="Delete"
+                                onClick={() => handleDelete(entry)}
+                                className="text-red-600 hover:text-red-800 hover:underline"
                               >
                                 Delete
                               </button>
@@ -800,16 +721,17 @@ const WasteEntryPage = () => {
 
       {/* Create/Edit Modal */}
       {openModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div ref={modalRef} className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
               <h3 className="text-xl font-semibold text-gray-800">
                 {isEditing ? 'Edit Waste Entry' : 'Create New Waste Entry'}
               </h3>
               <button
                 onClick={handleCloseModal}
                 className="text-gray-400 hover:text-gray-600 text-2xl"
+                disabled={modalLoading}
               >
                 ×
               </button>
@@ -831,7 +753,7 @@ const WasteEntryPage = () => {
                       value={formData.date}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                      required
+                      disabled={modalLoading}
                     />
                   </div>
                   <div>
@@ -843,8 +765,9 @@ const WasteEntryPage = () => {
                       value={formData.shift}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                      disabled={modalLoading}
                     >
-                      {shifts.map((shift) => (
+                      {shifts.map(shift => (
                         <option key={shift} value={shift}>{shift}</option>
                       ))}
                     </select>
@@ -860,57 +783,55 @@ const WasteEntryPage = () => {
                       rows="2"
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Any additional remarks..."
+                      disabled={modalLoading}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Details Table */}
+              {/* Details Section */}
               <div>
                 <div className="flex justify-between items-center mb-4">
                   <h4 className="text-base font-medium text-gray-700">Waste Details</h4>
                   <button
                     type="button"
                     onClick={addDetailRow}
-                    className="text-sm text-blue-600 hover:text-blue-800"
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center"
+                    disabled={modalLoading}
                   >
-                    + Add Row
+                    <span className="mr-1 text-lg">+</span> Add Row
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   {formData.details.map((detail, index) => (
-                    <div key={index} className="space-y-1">
+                    <div key={index} className="bg-gray-50 p-4 rounded-lg">
                       <div className="grid grid-cols-12 gap-3">
-                        {/* Department Autocomplete */}
+                        {/* Department */}
                         <div className="col-span-2">
-                          <div className="relative" ref={el => departmentRefs.current[index] = el}>
+                          <div className="relative dropdown-container">
                             <input
                               type="text"
                               value={departmentSearch[index] || ''}
-                              onChange={(e) => handleDepartmentSearchChange(index, e)}
+                              onChange={(e) => handleDepartmentSearchChange(index, e.target.value)}
                               onFocus={() => setShowDepartmentDropdown(prev => ({ ...prev, [index]: true }))}
-                              onBlur={() => handleDepartmentBlur(index)}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                                errors[`${index}_department`] ? 'border-red-500' : 'border-gray-200'
+                              }`}
                               placeholder="Department..."
-                              required
+                              disabled={modalLoading}
                             />
                             
-                            {/* Department Dropdown */}
                             {showDepartmentDropdown[index] && (
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                {getFilteredDepartments(index).length === 0 ? (
-                                  <div className="p-3 text-center text-gray-500">
-                                    {departmentSearch[index] ? 'No departments found' : 'No departments available'}
-                                  </div>
+                                {getFilteredDepartments(departmentSearch[index]).length === 0 ? (
+                                  <div className="p-3 text-center text-gray-500">No departments found</div>
                                 ) : (
-                                  getFilteredDepartments(index).map((dept) => (
+                                  getFilteredDepartments(departmentSearch[index]).map(dept => (
                                     <div
                                       key={dept}
                                       onClick={() => handleDepartmentSelect(index, dept)}
-                                      className={`p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                                        detail.department === dept ? 'bg-blue-50' : ''
-                                      }`}
+                                      className="p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                                     >
                                       <div className="font-medium text-gray-900">{dept}</div>
                                     </div>
@@ -919,45 +840,40 @@ const WasteEntryPage = () => {
                               </div>
                             )}
                           </div>
-                          {departmentErrors[index] && (
-                            <p className="mt-1 text-xs text-red-500">{departmentErrors[index]}</p>
+                          {errors[`${index}_department`] && (
+                            <p className="mt-1 text-xs text-red-500">{errors[`${index}_department`]}</p>
                           )}
                         </div>
 
-                        {/* Waste Type Autocomplete */}
+                        {/* Waste Type */}
                         <div className="col-span-2">
-                          <div className="relative" ref={el => wasteRefs.current[index] = el}>
+                          <div className="relative dropdown-container">
                             <input
                               type="text"
                               value={wasteSearch[index] || ''}
-                              onChange={(e) => handleWasteSearchChange(index, e)}
+                              onChange={(e) => handleWasteSearchChange(index, e.target.value)}
                               onFocus={() => setShowWasteDropdown(prev => ({ ...prev, [index]: true }))}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                                errors[`${index}_waste`] ? 'border-red-500' : 'border-gray-200'
+                              }`}
                               placeholder="Waste type..."
-                              required
+                              disabled={modalLoading}
                             />
                             
-                            {/* Waste Type Dropdown */}
                             {showWasteDropdown[index] && (
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                {wasteMastersLoading ? (
-                                  <div className="p-3 text-center text-gray-500">Loading...</div>
-                                ) : getFilteredWasteMasters(index).length === 0 ? (
-                                  <div className="p-3 text-center text-gray-500">
-                                    {wasteSearch[index] ? 'No waste types found' : 'No waste types available'}
-                                  </div>
+                                {getFilteredWasteMasters(wasteSearch[index]).length === 0 ? (
+                                  <div className="p-3 text-center text-gray-500">No waste types found</div>
                                 ) : (
-                                  getFilteredWasteMasters(index).map((waste) => (
+                                  getFilteredWasteMasters(wasteSearch[index]).map(waste => (
                                     <div
-                                      key={waste._id || waste.id}
+                                      key={waste.id || waste._id}
                                       onClick={() => handleWasteSelect(index, waste)}
-                                      className={`p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                                        detail.wasteMasterId === (waste._id || waste.id) ? 'bg-blue-50' : ''
-                                      }`}
+                                      className="p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                                     >
                                       <div className="font-medium text-gray-900">{waste.waste || waste.name}</div>
                                       <div className="text-xs text-gray-500">
-                                        {waste.department || 'No Dept'} • Code: #{formatCode(waste.code)} • {waste.wasteKg || 0}kg
+                                        Code: {waste.code || 'N/A'} • Dept: {waste.department || 'N/A'}
                                       </div>
                                     </div>
                                   ))
@@ -965,85 +881,79 @@ const WasteEntryPage = () => {
                               </div>
                             )}
                           </div>
+                          {errors[`${index}_waste`] && (
+                            <p className="mt-1 text-xs text-red-500">{errors[`${index}_waste`]}</p>
+                          )}
                         </div>
 
-                        {/* Packing Type Autocomplete */}
+                        {/* Packing Type */}
                         <div className="col-span-2">
-                          <div className="relative" ref={el => packingRefs.current[index] = el}>
+                          <div className="relative dropdown-container">
                             <input
                               type="text"
                               value={packingSearch[index] || ''}
-                              onChange={(e) => handlePackingSearchChange(index, e)}
+                              onChange={(e) => handlePackingSearchChange(index, e.target.value)}
                               onFocus={() => setShowPackingDropdown(prev => ({ ...prev, [index]: true }))}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                                errors[`${index}_packing`] ? 'border-red-500' : 'border-gray-200'
+                              }`}
                               placeholder="Packing type..."
-                              required
+                              disabled={modalLoading}
                             />
                             
-                            {/* Packing Type Dropdown */}
                             {showPackingDropdown[index] && (
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                {packingTypesLoading ? (
-                                  <div className="p-3 text-center text-gray-500">Loading...</div>
-                                ) : getFilteredPackingTypes(index).length === 0 ? (
-                                  <div className="p-3 text-center text-gray-500">
-                                    {packingSearch[index] ? 'No packing types found' : 'No packing types available'}
-                                  </div>
+                                {getFilteredPackingTypes(packingSearch[index]).length === 0 ? (
+                                  <div className="p-3 text-center text-gray-500">No packing types found</div>
                                 ) : (
-                                  getFilteredPackingTypes(index).map((packing) => (
+                                  getFilteredPackingTypes(packingSearch[index]).map(packing => (
                                     <div
-                                      key={packing._id || packing.id}
+                                      key={packing.id || packing._id}
                                       onClick={() => handlePackingSelect(index, packing)}
-                                      className={`p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                                        detail.packingTypeId === (packing._id || packing.id) ? 'bg-blue-50' : ''
-                                      }`}
+                                      className="p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                                     >
                                       <div className="font-medium text-gray-900">{packing.name}</div>
-                                      <div className="text-xs text-gray-500">
-                                        Code: #{formatCode(packing.code)}
-                                      </div>
+                                      <div className="text-xs text-gray-500">Code: {packing.code || 'N/A'}</div>
                                     </div>
                                   ))
                                 )}
                               </div>
                             )}
                           </div>
+                          {errors[`${index}_packing`] && (
+                            <p className="mt-1 text-xs text-red-500">{errors[`${index}_packing`]}</p>
+                          )}
                         </div>
 
-                        {/* Godown Autocomplete */}
+                        {/* Godown */}
                         <div className="col-span-2">
-                          <div className="relative" ref={el => godownRefs.current[index] = el}>
+                          <div className="relative dropdown-container">
                             <input
                               type="text"
                               value={godownSearch[index] || ''}
-                              onChange={(e) => handleGodownSearchChange(index, e)}
+                              onChange={(e) => handleGodownSearchChange(index, e.target.value)}
                               onFocus={() => setShowGodownDropdown(prev => ({ ...prev, [index]: true }))}
-                              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                              className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                                errors[`${index}_godown`] ? 'border-red-500' : 'border-gray-200'
+                              }`}
                               placeholder="Godown..."
-                              required
+                              disabled={modalLoading}
                             />
                             
-                            {/* Godown Dropdown */}
                             {showGodownDropdown[index] && (
                               <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                                {godownsLoading ? (
-                                  <div className="p-3 text-center text-gray-500">Loading...</div>
-                                ) : getFilteredGodowns(index).length === 0 ? (
-                                  <div className="p-3 text-center text-gray-500">
-                                    {godownSearch[index] ? 'No godowns found' : 'No godowns available'}
-                                  </div>
+                                {getFilteredGodowns(godownSearch[index]).length === 0 ? (
+                                  <div className="p-3 text-center text-gray-500">No godowns found</div>
                                 ) : (
-                                  getFilteredGodowns(index).map((godown) => (
+                                  getFilteredGodowns(godownSearch[index]).map(godown => (
                                     <div
-                                      key={godown._id || godown.id}
+                                      key={godown.id || godown._id}
                                       onClick={() => handleGodownSelect(index, godown)}
-                                      className={`p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                                        detail.godownId === (godown._id || godown.id) ? 'bg-blue-50' : ''
-                                      }`}
+                                      className="p-3 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                                     >
-                                      <div className="font-medium text-gray-900">{godown.godownName}</div>
+                                      <div className="font-medium text-gray-900">{godown.godownName || godown.name}</div>
                                       <div className="text-xs text-gray-500">
-                                        Code: #{formatCode(godown.code)} • {godown.location || 'No Location'}
+                                        Code: {godown.code || 'N/A'} • {godown.location || 'No location'}
                                       </div>
                                     </div>
                                   ))
@@ -1051,29 +961,38 @@ const WasteEntryPage = () => {
                               </div>
                             )}
                           </div>
+                          {errors[`${index}_godown`] && (
+                            <p className="mt-1 text-xs text-red-500">{errors[`${index}_godown`]}</p>
+                          )}
                         </div>
 
                         {/* Net Weight */}
-                        <div className="col-span-2">
+                        <div className="col-span-3">
                           <input
                             type="number"
                             value={detail.netWeight}
                             onChange={(e) => handleDetailChange(index, 'netWeight', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                              errors[`${index}_weight`] ? 'border-red-500' : 'border-gray-200'
+                            }`}
                             placeholder="Weight (kg)"
                             min="0"
                             step="0.01"
-                            required
+                            disabled={modalLoading}
                           />
+                          {errors[`${index}_weight`] && (
+                            <p className="mt-1 text-xs text-red-500">{errors[`${index}_weight`]}</p>
+                          )}
                         </div>
 
-                        {/* Action */}
-                        <div className="col-span-1 flex items-center">
+                        {/* Remove button */}
+                        <div className="col-span-1 flex items-center justify-center">
                           {formData.details.length > 1 && (
                             <button
                               type="button"
                               onClick={() => removeDetailRow(index)}
-                              className="text-red-500 hover:text-red-700 text-xl"
+                              className="text-red-500 hover:text-red-700 text-2xl"
+                              disabled={modalLoading}
                             >
                               ×
                             </button>
@@ -1084,7 +1003,7 @@ const WasteEntryPage = () => {
                   ))}
                 </div>
 
-                {/* Total Weight */}
+                {/* Total */}
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg flex justify-between items-center">
                   <span className="text-sm text-gray-600">Total Rows: {formData.details.length}</span>
                   <div className="text-right">
@@ -1101,16 +1020,16 @@ const WasteEntryPage = () => {
                 <button
                   onClick={handleCloseModal}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                  disabled={loading}
+                  disabled={modalLoading}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center disabled:opacity-50"
+                  disabled={modalLoading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center disabled:opacity-50 min-w-[100px] justify-center"
                 >
-                  {loading ? (
+                  {modalLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       Saving...
@@ -1118,6 +1037,117 @@ const WasteEntryPage = () => {
                   ) : (
                     isEditing ? 'Update Entry' : 'Create Entry'
                   )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Modal */}
+      {openViewModal && viewEntry && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+              <h3 className="text-xl font-semibold text-gray-800">Waste Entry Details</h3>
+              <button
+                onClick={handleCloseViewModal}
+                className="text-gray-400 hover:text-gray-600 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {/* Header Information */}
+              <div className="mb-6 p-5 bg-gray-50 rounded-lg">
+                <h4 className="text-base font-medium text-gray-700 mb-4">Entry Information</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500">Date</p>
+                    <p className="text-base font-medium text-gray-900">{formatDate(viewEntry.date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Shift</p>
+                    <p className="text-base font-medium text-gray-900">
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full inline-block ${
+                        viewEntry.shift === 'ALL' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'
+                      }`}>
+                        {viewEntry.shift}
+                      </span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-500">Entry ID</p>
+                    <p className="text-base font-medium text-gray-900">{viewEntry.id || viewEntry._id}</p>
+                  </div>
+                  {viewEntry.remarks && (
+                    <div className="md:col-span-3">
+                      <p className="text-sm text-gray-500">Remarks</p>
+                      <p className="text-base text-gray-900">{viewEntry.remarks}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Details Table */}
+              <div>
+                <h4 className="text-base font-medium text-gray-700 mb-4">Waste Details</h4>
+                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">S.No</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Department</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Waste Type</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Packing</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Godown</th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Weight (kg)</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      {viewEntry.details?.map((detail, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 text-sm text-gray-500">{index + 1}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{detail.department || '-'}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{getWasteMasterName(detail.wasteMaster || detail.wasteMasterId)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{getPackingTypeName(detail.packingType || detail.packingTypeId)}</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">{getGodownName(detail.godown || detail.godownId)}</td>
+                          <td className="px-4 py-3 text-sm font-semibold text-gray-900">{detail.netWeight?.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-gray-50 font-medium">
+                        <td colSpan="5" className="px-4 py-3 text-sm text-gray-700 text-right">Total Weight:</td>
+                        <td className="px-4 py-3 text-sm font-bold text-gray-900">
+                          {viewEntry.details?.reduce((sum, d) => sum + (d.netWeight || 0), 0).toLocaleString()} kg
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Metadata */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-400 border-t border-gray-100 pt-4">
+                <div>
+                  <p>Created: {viewEntry.createdAt ? new Date(viewEntry.createdAt).toLocaleString() : 'N/A'}</p>
+                </div>
+                <div>
+                  <p>Last Updated: {viewEntry.updatedAt ? new Date(viewEntry.updatedAt).toLocaleString() : 'N/A'}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 bg-gray-50">
+              <div className="flex justify-end">
+                <button
+                  onClick={handleCloseViewModal}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                >
+                  Close
                 </button>
               </div>
             </div>
